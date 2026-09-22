@@ -1,0 +1,188 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>MEDVITA - Médicos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg class="sidebar-pulse" viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20"/></svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Administração</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/admin}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/></svg>
+            Painel
+          </a>
+
+          <a th:href="@{/admin/medicos}" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M8 3H5.5"/><path d="M15.5 3H13"/><path d="M18 9v2.5a6 6 0 0 1-12 0V9"/><circle cx="19.5" cy="8" r="1.6"/></svg>
+            Médicos
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a th:href="@{/admin}" class="btn-back">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+            Voltar ao Painel
+          </a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Administração</span>
+            <h1>Médicos</h1>
+            <p>Adicione ou remova profissionais de saúde do sistema.</p>
+          </div>
+
+          
+        </div>
+
+        <div class="content">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Adicionar médico</h2>
+                <p>Cadastre um novo profissional de saúde no MEDVITA.</p>
+              </div>
+            </div>
+
+            <form>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="nome">Nome completo</label>
+                  <input type="text" id="nome" name="nome" placeholder="Nome do profissional" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="registro">Registro profissional (CRM)</label>
+                  <input type="text" id="registro" name="registro" placeholder="Ex.: CRM 123456-MG" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="especialidade">Especialidade</label>
+                  <select id="especialidade" name="especialidade" required>
+                    <option value="" selected disabled>Selecione a especialidade</option>
+                    <option>Clínica Geral</option>
+                    <option>Cardiologia</option>
+                    <option>Ortopedia</option>
+                    <option>Pediatria</option>
+                    <option>Dermatologia</option>
+                    <option>Ginecologia</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="telefone">Telefone</label>
+                  <input type="tel" id="telefone" name="telefone" placeholder="Telefone" required />
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="email">E-mail</label>
+                  <input type="email" id="email" name="email" placeholder="E-mail para contato" required />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                  Adicionar médico
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Médicos cadastrados</h2>
+                <p>Equipe médica atualmente cadastrada no sistema.</p>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Registro</th>
+                    <th>Especialidade</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>Dr. Ricardo Almeida</td>
+                    <td>CRM 111222-MG</td>
+                    <td>Cardiologia</td>
+                    <td>(31) 99999-0001</td>
+                    <td>ricardo.almeida@medvita.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-danger btn-sm">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
+                        Remover
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Dra. Camila Souza</td>
+                    <td>CRM 222333-MG</td>
+                    <td>Clínica Geral</td>
+                    <td>(31) 99999-0002</td>
+                    <td>camila.souza@medvita.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-danger btn-sm">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
+                        Remover
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Dr. André Lima</td>
+                    <td>CRM 333444-MG</td>
+                    <td>Ortopedia</td>
+                    <td>(31) 99999-0003</td>
+                    <td>andre.lima@medvita.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-danger btn-sm">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
+                        Remover
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

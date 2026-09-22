@@ -1,0 +1,12 @@
+com/example/MedVita/exception/SendEmailException.class
+com/example/MedVita/config/UserConfig.class
+com/example/MedVita/application/TelaLoginApplication.class
+com/example/MedVita/config/SecurityConfig.class
+com/example/MedVita/service/SendEmailService.class
+com/example/MedVita/service/PasswordRecoveryService$RecoveryToken.class
+com/example/MedVita/config/RecaptchaFilter.class
+com/example/MedVita/controller/SecureLoginController.class
+com/example/MedVita/service/RecaptchaService.class
+com/example/MedVita/service/UserService.class
+com/example/MedVita/exception/GlobalExceptionHandler.class
+com/example/MedVita/service/PasswordRecoveryService.class

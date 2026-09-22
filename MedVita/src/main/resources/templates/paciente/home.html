@@ -1,0 +1,298 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>MEDVITA - Portal do Paciente</title>
+
+    <!-- Fonte Montserrat - Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg
+              class="sidebar-pulse"
+              viewBox="0 0 120 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Portal do Paciente</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/home}" class="active">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M4 11.5 12 4l8 7.5" />
+              <path
+                d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"
+              />
+            </svg>
+            Início
+          </a>
+
+          <a th:href="@{/paciente/consultas}">
+            <svg class="icon" viewBox="0 0 24 24">
+              <rect x="4" y="5.5" width="16" height="15" rx="2" />
+              <path d="M4 10h16" />
+              <path d="M8 3.5v4" />
+              <path d="M16 3.5v4" />
+            </svg>
+            Minhas Consultas
+          </a>
+
+          <a th:href="@{/paciente/agendar-consulta}">
+            <svg class="icon" viewBox="0 0 24 24">
+              <rect x="4" y="5.5" width="16" height="15" rx="2" />
+              <path d="M4 10h16" />
+              <path d="M8 3.5v4" />
+              <path d="M16 3.5v4" />
+              <path d="M12 13v5" />
+              <path d="M9.5 15.5h5" />
+            </svg>
+            Agendar Consulta
+          </a>
+
+          <a th:href="@{/paciente/internacoes}">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M2 20v-9" />
+              <path d="M2 15h20" />
+              <path d="M2 20h20" />
+              <path
+                d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"
+              />
+              <rect x="4" y="10" width="5" height="3.5" rx="1" />
+            </svg>
+            Internações
+          </a>
+
+          <a th:href="@{/paciente/historico}">
+            <svg class="icon" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="12" height="17" rx="2" />
+              <rect x="9" y="2.5" width="6" height="3" rx="1" />
+              <path d="M9 11h6" />
+              <path d="M9 14.5h6" />
+              <path d="M9 18h4" />
+            </svg>
+            Histórico Médico
+          </a>
+
+          <a th:href="@{/paciente/perfil}">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+            </svg>
+            Meus Dados
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">
+              <span
+                th:text="${#strings.toUpperCase(#strings.substring(usuario, 0, 1))}"
+              ></span>
+            </div>
+            <div class="sidebar-user-text">
+              <span>Paciente</span>
+              <strong th:text="${usuario}"></strong>
+            </div>
+          </div>
+
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">
+              <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <path
+                  d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"
+                />
+                <path d="M15 16l4-4-4-4" />
+                <path d="M19 12H9" />
+              </svg>
+              Sair
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+         CONTEÚDO PRINCIPAL
+         ===================================================== -->
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Portal do Paciente</span>
+            <h1>Bem-vindo(a)!</h1>
+            <p>
+              Usuário: <strong th:text="${usuario}"></strong> · Login
+              realizado com sucesso.
+            </p>
+          </div>
+        </div>
+
+        <div class="content">
+          <!-- =================================================
+               RESUMO
+               ================================================= -->
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <rect x="4" y="5.5" width="16" height="15" rx="2" />
+                  <path d="M4 10h16" />
+                  <path d="M8 3.5v4" />
+                  <path d="M16 3.5v4" />
+                </svg>
+              </div>
+              <span class="stat-label">Próxima consulta</span>
+              <div class="stat-value">--</div>
+              <p class="stat-hint">Nenhuma consulta agendada no momento.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M2 20v-9" />
+                  <path d="M2 15h20" />
+                  <path d="M2 20h20" />
+                  <path
+                    d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"
+                  />
+                  <rect x="4" y="10" width="5" height="3.5" rx="1" />
+                </svg>
+              </div>
+              <span class="stat-label">Internações ativas</span>
+              <div class="stat-value">0</div>
+              <p class="stat-hint">Você não possui internações em aberto.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <rect x="6" y="4" width="12" height="17" rx="2" />
+                  <rect x="9" y="2.5" width="6" height="3" rx="1" />
+                  <path d="M9 11h6" />
+                  <path d="M9 14.5h6" />
+                </svg>
+              </div>
+              <span class="stat-label">Histórico</span>
+              <div class="stat-value">0</div>
+              <p class="stat-hint">Atendimentos registrados até agora.</p>
+            </div>
+          </div>
+
+          <!-- =================================================
+               ACESSO RÁPIDO
+               ================================================= -->
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Acesso rápido</h2>
+                <p>Gerencie suas consultas, internações e dados pessoais.</p>
+              </div>
+            </div>
+
+            <div class="quick-links">
+              <a th:href="@{/paciente/consultas}" class="quick-link-card">
+                <div class="quick-link-icon">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <rect x="4" y="5.5" width="16" height="15" rx="2" />
+                    <path d="M4 10h16" />
+                    <path d="M8 3.5v4" />
+                    <path d="M16 3.5v4" />
+                  </svg>
+                </div>
+                <h3>Minhas Consultas</h3>
+                <p>Veja suas consultas agendadas, realizadas e canceladas.</p>
+              </a>
+
+              <a
+                th:href="@{/paciente/agendar-consulta}"
+                class="quick-link-card"
+              >
+                <div class="quick-link-icon">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v8" />
+                    <path d="M8 12h8" />
+                  </svg>
+                </div>
+                <h3>Agendar Consulta</h3>
+                <p>Escolha um profissional, data e horário disponíveis.</p>
+              </a>
+
+              <a th:href="@{/paciente/internacoes}" class="quick-link-card">
+                <div class="quick-link-icon">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M2 20v-9" />
+                    <path d="M2 15h20" />
+                    <path d="M2 20h20" />
+                    <path
+                      d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"
+                    />
+                    <rect x="4" y="10" width="5" height="3.5" rx="1" />
+                  </svg>
+                </div>
+                <h3>Internações</h3>
+                <p>Acompanhe suas internações, quarto e datas de alta.</p>
+              </a>
+
+              <a th:href="@{/paciente/historico}" class="quick-link-card">
+                <div class="quick-link-icon">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <rect x="6" y="4" width="12" height="17" rx="2" />
+                    <rect x="9" y="2.5" width="6" height="3" rx="1" />
+                    <path d="M9 11h6" />
+                    <path d="M9 14.5h6" />
+                  </svg>
+                </div>
+                <h3>Histórico Médico</h3>
+                <p>Consulte o histórico completo dos seus atendimentos.</p>
+              </a>
+
+              <a th:href="@{/paciente/perfil}" class="quick-link-card">
+                <div class="quick-link-icon">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3.5" />
+                    <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+                  </svg>
+                </div>
+                <h3>Meus Dados</h3>
+                <p>Veja e revise as informações do seu cadastro.</p>
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

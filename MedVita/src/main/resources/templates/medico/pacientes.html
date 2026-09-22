@@ -1,0 +1,157 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>MEDVITA - Pacientes</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg class="sidebar-pulse" viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20"/></svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Área Médica</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/medico}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/></svg>
+            Painel
+          </a>
+
+          <a th:href="@{/medico/pacientes}" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/></svg>
+            Pacientes
+          </a>
+
+          <a th:href="@{/medico/consultas}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg>
+            Consultas
+          </a>
+
+          <a th:href="@{/medico/internacoes}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg>
+            Internações
+          </a>
+
+          <a th:href="@{/medico/quartos}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg>
+            Quartos
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a th:href="@{/medico}" class="btn-back">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+            Voltar ao Painel
+          </a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Área Médica</span>
+            <h1>Pacientes</h1>
+            <p>Consulte os dados e fichas dos pacientes atendidos.</p>
+          </div>
+
+          
+        </div>
+
+        <div class="content">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Buscar paciente</h2>
+                <p>Localize um paciente pelo nome, CPF ou e-mail.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="busca">Buscar</label>
+                <input type="text" id="busca" placeholder="Nome, CPF ou e-mail do paciente" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Pacientes cadastrados</h2>
+                <p>Lista de pacientes atendidos pelo MEDVITA.</p>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Data de nascimento</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>Leonardo Martins</td>
+                    <td>123.456.789-00</td>
+                    <td>10/05/1998</td>
+                    <td>(31) 98888-0001</td>
+                    <td>leonardo@email.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Mariana Costa</td>
+                    <td>987.654.321-00</td>
+                    <td>22/11/1990</td>
+                    <td>(31) 98888-0002</td>
+                    <td>mariana@email.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>João Pedro Santos</td>
+                    <td>456.789.123-00</td>
+                    <td>03/02/1985</td>
+                    <td>(31) 98888-0003</td>
+                    <td>joaopedro@email.com</td>
+                    <td class="actions">
+                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

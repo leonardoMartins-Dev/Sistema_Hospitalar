@@ -1,0 +1,11 @@
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/application/TelaLoginApplication.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/config/RecaptchaFilter.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/config/SecurityConfig.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/config/UserConfig.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/controller/SecureLoginController.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/exception/GlobalExceptionHandler.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/exception/SendEmailException.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/service/PasswordRecoveryService.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/service/RecaptchaService.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/service/SendEmailService.java
+/Users/leonardomartinsmacedo/Desktop/TRABALHO PM/Sistema_Hospitalar/MedVita/src/main/java/com/example/MedVita/service/UserService.java

@@ -1,0 +1,152 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>MEDVITA - Área Médica</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg class="sidebar-pulse" viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20"/></svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Área Médica</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/medico}" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/></svg>
+            Painel
+          </a>
+
+          <a th:href="@{/medico/pacientes}">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/></svg>
+            Pacientes
+          </a>
+
+          <a th:href="@{/medico/consultas}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg>
+            Consultas
+          </a>
+
+          <a th:href="@{/medico/internacoes}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg>
+            Internações
+          </a>
+
+          <a th:href="@{/medico/quartos}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg>
+            Quartos
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">
+              <span th:text="${#strings.toUpperCase(#strings.substring(usuario, 0, 1))}"></span>
+            </div>
+            <div class="sidebar-user-text">
+              <span>Profissional</span>
+              <strong th:text="${usuario}"></strong>
+            </div>
+          </div>
+
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/></svg>
+              Sair
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Área Médica</span>
+            <h1>Bem-vindo(a), Doutor(a)!</h1>
+            <p>Usuário: <strong th:text="${usuario}"></strong> · Acesso realizado com sucesso.</p>
+          </div>
+
+          
+        </div>
+
+        <div class="content">
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg></div>
+              <span class="stat-label">Consultas hoje</span>
+              <div class="stat-value">0</div>
+              <p class="stat-hint">Nenhuma consulta agendada para hoje.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg></div>
+              <span class="stat-label">Pacientes internados</span>
+              <div class="stat-value">0</div>
+              <p class="stat-hint">Nenhuma internação em andamento.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg></div>
+              <span class="stat-label">Quartos disponíveis</span>
+              <div class="stat-value">--</div>
+              <p class="stat-hint">Consulte a disponibilidade de quartos.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Acesso rápido</h2>
+                <p>Gerencie pacientes, consultas, internações e quartos.</p>
+              </div>
+            </div>
+
+            <div class="quick-links">
+              <a th:href="@{/medico/pacientes}" class="quick-link-card">
+                <div class="quick-link-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/></svg></div>
+                <h3>Pacientes</h3>
+                <p>Consulte os dados e fichas dos pacientes atendidos.</p>
+              </a>
+
+              <a th:href="@{/medico/consultas}" class="quick-link-card">
+                <div class="quick-link-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg></div>
+                <h3>Consultas</h3>
+                <p>Acompanhe sua agenda de consultas no hospital.</p>
+              </a>
+
+              <a th:href="@{/medico/internacoes}" class="quick-link-card">
+                <div class="quick-link-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg></div>
+                <h3>Internações</h3>
+                <p>Gerencie internações, altas e observações médicas.</p>
+              </a>
+
+              <a th:href="@{/medico/quartos}" class="quick-link-card">
+                <div class="quick-link-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg></div>
+                <h3>Quartos</h3>
+                <p>Controle a capacidade e disponibilidade dos quartos.</p>
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
