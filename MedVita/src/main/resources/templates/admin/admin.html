@@ -1,0 +1,125 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>MEDVITA - Administração</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg class="sidebar-pulse" viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20"/></svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Administração</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/admin}" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/></svg>
+            Painel
+          </a>
+
+          <a th:href="@{/admin/medicos}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M8 3H5.5"/><path d="M15.5 3H13"/><path d="M18 9v2.5a6 6 0 0 1-12 0V9"/><circle cx="19.5" cy="8" r="1.6"/></svg>
+            Médicos
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">
+              <span th:text="${#strings.toUpperCase(#strings.substring(usuario, 0, 1))}"></span>
+            </div>
+            <div class="sidebar-user-text">
+              <span>Administrador(a)</span>
+              <strong th:text="${usuario}"></strong>
+            </div>
+          </div>
+
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/></svg>
+              Sair
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Administração</span>
+            <h1>Bem-vindo(a)!</h1>
+            <p>Usuário: <strong th:text="${usuario}"></strong> · Acesso realizado com sucesso.</p>
+          </div>
+
+          
+        </div>
+
+        <div class="content">
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M8 3H5.5"/><path d="M15.5 3H13"/><path d="M18 9v2.5a6 6 0 0 1-12 0V9"/><circle cx="19.5" cy="8" r="1.6"/></svg></div>
+              <span class="stat-label">Médicos cadastrados</span>
+              <div class="stat-value">3</div>
+              <p class="stat-hint">Profissionais ativos no MEDVITA.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/></svg></div>
+              <span class="stat-label">Pacientes cadastrados</span>
+              <div class="stat-value">--</div>
+              <p class="stat-hint">Total de pacientes atendidos.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg></div>
+              <span class="stat-label">Consultas hoje</span>
+              <div class="stat-value">0</div>
+              <p class="stat-hint">Consultas agendadas para hoje.</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg></div>
+              <span class="stat-label">Quartos disponíveis</span>
+              <div class="stat-value">--</div>
+              <p class="stat-hint">Disponibilidade atual do hospital.</p>
+            </div>
+          </div>
+
+          <div class="cta-card">
+            <div class="cta-card-text">
+              <span class="eyebrow">Gestão de equipe</span>
+              <h2>Gerencie os médicos do hospital</h2>
+              <p>
+                Adicione novos profissionais de saúde ou remova médicos que
+                não fazem mais parte do quadro do MEDVITA.
+              </p>
+            </div>
+
+            <a th:href="@{/admin/medicos}" class="btn">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M8 3H5.5"/><path d="M15.5 3H13"/><path d="M18 9v2.5a6 6 0 0 1-12 0V9"/><circle cx="19.5" cy="8" r="1.6"/></svg>
+              Gerenciar Médicos
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
