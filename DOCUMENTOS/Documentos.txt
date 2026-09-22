@@ -1,0 +1,1 @@
+Crie uma pasta para todos documentos dentro da /DOCUMENTOS e coloque-os la dentro. (ex: DOCUMENTOS/DiagramaUML/arquivo)
