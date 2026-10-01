@@ -1,3 +1,17 @@
+> ## ⚠️ ATENÇÃO
+>
+> O banco de dados (Supabase) **ainda não está funcionando**. Enquanto isso, dá para entrar no site e ver as telas com estes **3 logins de teste**. Eles ficam fixos no [`application.properties`](MedVita/src/main/resources/application.properties) e não precisam de banco:
+>
+> | Perfil        | Usuário    | Senha  | Entra em  |
+> |---------------|------------|--------|-----------|
+> | Paciente      | `paciente` | `1234` | `/home`   |
+> | Médico        | `medico`   | `1234` | `/medico` |
+> | Administrador | `admin`    | `1234` | `/admin`  |
+>
+> - O `.env` ainda precisa das chaves do **reCAPTCHA**, porque o captcha continua sendo pedido no login. As linhas `SUPABASE_*` podem ficar de fora.
+> - Sem o banco, **cadastro (`/register`) e recuperação de senha não funcionam**, e os números dos painéis ainda não vêm de dados reais.
+> - Quando o banco estiver funcionando, apague o bloco `USUÁRIOS DE TESTE` do `application.properties`. O admin continua.
+
 # MedVita — Sistema Hospitalar
 
 Trabalho prático da disciplina de **Programação Modular**.
