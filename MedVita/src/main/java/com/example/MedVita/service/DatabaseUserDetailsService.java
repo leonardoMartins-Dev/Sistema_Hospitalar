@@ -27,6 +27,12 @@ import com.example.MedVita.models.Paciente;
  *                  ProfissionalSaude existir, entra aqui um passo a mais,
  *                  antes do "não encontrado", devolvendo .roles("MEDICO").
  *
+ * USUÁRIOS DE TESTE (TEMPORÁRIO): enquanto o banco não funciona, um paciente
+ * e um médico também vêm do application.properties (app.teste.*), conferidos
+ * logo depois do admin e ANTES de consultar o banco. Quando o bloco for
+ * apagado do application.properties, os campos ficam vazios e este passo é
+ * simplesmente pulado.
+ *
  * COMO O LOGIN FUNCIONA:
  *   1. O usuário envia o formulário de /login (campos "username" e "password").
  *   2. O RecaptchaFilter valida o captcha.
@@ -41,8 +47,9 @@ import com.example.MedVita.models.Paciente;
  *   7. Se bater, o successHandler do SecurityConfig redireciona para
  *      /admin (ROLE_ADMIN), /medico (ROLE_MEDICO) ou /home (ROLE_USER).
  *
- * A senha do admin está em texto puro no application.properties, então ela
- * é passada pelo BCrypt uma vez, quando a aplicação sobe (no construtor).
+ * As senhas do admin e dos usuários de teste estão em texto puro no
+ * application.properties, então elas são passadas pelo BCrypt uma vez,
+ * quando a aplicação sobe (no construtor).
  */
 @Service
 public class DatabaseUserDetailsService implements UserDetailsService {
@@ -50,12 +57,20 @@ public class DatabaseUserDetailsService implements UserDetailsService {
     private final PacienteService pacienteService;
     private final String adminUsername;
     private final String adminPasswordHash;
+    private final String pacienteTesteUsername;
+    private final String pacienteTestePasswordHash;
+    private final String medicoTesteUsername;
+    private final String medicoTestePasswordHash;
 
     public DatabaseUserDetailsService(PacienteService pacienteService, UserConfig userConfig,
             PasswordEncoder passwordEncoder) {
         this.pacienteService = pacienteService;
         this.adminUsername = userConfig.getAdminUsername();
         this.adminPasswordHash = passwordEncoder.encode(userConfig.getAdminPassword());
+        this.pacienteTesteUsername = userConfig.getPacienteTesteUsername();
+        this.pacienteTestePasswordHash = passwordEncoder.encode(userConfig.getPacienteTestePassword());
+        this.medicoTesteUsername = userConfig.getMedicoTesteUsername();
+        this.medicoTestePasswordHash = passwordEncoder.encode(userConfig.getMedicoTestePassword());
     }
 
     @Override
@@ -67,6 +82,25 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                     .username(adminUsername)
                     .password(adminPasswordHash)
                     .roles("ADMIN")
+                    .build();
+        }
+
+        // USUÁRIOS DE TESTE (application.properties, temporário).
+        // O isBlank() impede que um username vazio entre quando o bloco
+        // app.teste.* for apagado.
+        if (!pacienteTesteUsername.isBlank() && pacienteTesteUsername.equals(username)) {
+            return User.builder()
+                    .username(pacienteTesteUsername)
+                    .password(pacienteTestePasswordHash)
+                    .roles("USER")
+                    .build();
+        }
+
+        if (!medicoTesteUsername.isBlank() && medicoTesteUsername.equals(username)) {
+            return User.builder()
+                    .username(medicoTesteUsername)
+                    .password(medicoTestePasswordHash)
+                    .roles("MEDICO")
                     .build();
         }
 

@@ -15,6 +15,10 @@ import org.springframework.context.annotation.Configuration;
  *   - ADMINISTRADOR (app.admin.*): usuário, senha e nome do admin. O admin
  *     NÃO fica no banco; o DatabaseUserDetailsService confere o login dele
  *     com estes valores.
+ *   - USUÁRIOS DE TESTE (app.teste.*): um paciente e um médico TEMPORÁRIOS,
+ *     para entrar no site enquanto o banco não funciona. Têm valor padrão
+ *     vazio (o ":" no @Value), então dá para apagar o bloco do
+ *     application.properties sem quebrar a aplicação: vazio = desativado.
  *   - reCAPTCHA (recaptcha.*): a site key vai para a página de login (via
  *     SecureLoginController) e a secret key é usada pelo RecaptchaService para
  *     validar o captcha no Google.
@@ -34,6 +38,23 @@ public class UserConfig {
 
     @Value("${app.admin.name}")
     private String adminName;
+
+
+    // =========================================================
+    // USUÁRIOS DE TESTE (temporário, enquanto o banco não funciona)
+    // =========================================================
+
+    @Value("${app.teste.paciente.username:}")
+    private String pacienteTesteUsername;
+
+    @Value("${app.teste.paciente.password:}")
+    private String pacienteTestePassword;
+
+    @Value("${app.teste.medico.username:}")
+    private String medicoTesteUsername;
+
+    @Value("${app.teste.medico.password:}")
+    private String medicoTestePassword;
 
 
     // =========================================================
@@ -61,6 +82,27 @@ public class UserConfig {
 
     public String getAdminName() {
         return adminName;
+    }
+
+
+    // =========================================================
+    // GETTERS - USUÁRIOS DE TESTE
+    // =========================================================
+
+    public String getPacienteTesteUsername() {
+        return pacienteTesteUsername;
+    }
+
+    public String getPacienteTestePassword() {
+        return pacienteTestePassword;
+    }
+
+    public String getMedicoTesteUsername() {
+        return medicoTesteUsername;
+    }
+
+    public String getMedicoTestePassword() {
+        return medicoTestePassword;
     }
 
 
