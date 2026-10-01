@@ -3,22 +3,24 @@ package com.example.MedVita.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * LEITURA DAS CONFIGURAÇÕES PERSONALIZADAS DO application.properties.
+ *
+ * Centraliza em um só lugar os valores que o resto do código precisa ler do
+ * application.properties (que por sua vez pode puxar do arquivo .env).
+ * Cada campo com @Value("${chave}") recebe o valor da chave quando a
+ * aplicação sobe; se a chave não existir, a aplicação nem inicia.
+ *
+ * O que tem aqui:
+ *   - ADMINISTRADOR (app.admin.*): usuário, senha e nome do admin. O admin
+ *     NÃO fica no banco; o DatabaseUserDetailsService confere o login dele
+ *     com estes valores.
+ *   - reCAPTCHA (recaptcha.*): a site key vai para a página de login (via
+ *     SecureLoginController) e a secret key é usada pelo RecaptchaService para
+ *     validar o captcha no Google.
+ */
 @Configuration
 public class UserConfig {
-
-    // =========================================================
-    // USUÁRIO
-    // =========================================================
-
-    @Value("${app.user.username}")
-    private String userUsername;
-
-    @Value("${app.user.password}")
-    private String userPassword;
-
-    @Value("${app.user.name}")
-    private String userName;
-
 
     // =========================================================
     // ADMINISTRADOR
@@ -35,20 +37,6 @@ public class UserConfig {
 
 
     // =========================================================
-    // MÉDICO
-    // =========================================================
-
-    @Value("${app.medico.username}")
-    private String medicoUsername;
-
-    @Value("${app.medico.password}")
-    private String medicoPassword;
-
-    @Value("${app.medico.name}")
-    private String medicoName;
-
-
-    // =========================================================
     // GOOGLE reCAPTCHA
     // =========================================================
 
@@ -57,23 +45,6 @@ public class UserConfig {
 
     @Value("${recaptcha.secret-key}")
     private String recaptchaSecretKey;
-
-
-    // =========================================================
-    // GETTERS - USUÁRIO
-    // =========================================================
-
-    public String getUserUsername() {
-        return userUsername;
-    }
-
-    public String getUserPassword() {
-        return userPassword;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
 
 
     // =========================================================
@@ -90,23 +61,6 @@ public class UserConfig {
 
     public String getAdminName() {
         return adminName;
-    }
-
-
-    // =========================================================
-    // GETTERS - MÉDICO
-    // =========================================================
-
-    public String getMedicoUsername() {
-        return medicoUsername;
-    }
-
-    public String getMedicoPassword() {
-        return medicoPassword;
-    }
-
-    public String getMedicoName() {
-        return medicoName;
     }
 
 

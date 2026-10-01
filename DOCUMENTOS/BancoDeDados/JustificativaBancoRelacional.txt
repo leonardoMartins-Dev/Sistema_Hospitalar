@@ -1,0 +1,195 @@
+MEDVITA - SISTEMA HOSPITALAR
+Justificativa técnica da escolha do banco de dados
+
+Programação Modular - Bacharelado em Engenharia de Software - PUC Minas
+
+
+=========================================================================
+1. DECISÃO
+=========================================================================
+
+O MedVita utiliza um banco de dados RELACIONAL: PostgreSQL, hospedado no
+Supabase. A aplicação acessa o banco pela API REST desenvolvida em Spring
+Boot, usando Spring Data JPA (Hibernate) e o driver JDBC do PostgreSQL.
+
+Resumo do motivo: os dados de um hospital são estruturados e fortemente
+interligados, e quase todas as regras de negócio do enunciado são regras
+de integridade entre esses dados. Esse é exatamente o tipo de problema
+que um banco relacional resolve melhor.
+
+
+=========================================================================
+2. OS DADOS DO SISTEMA SÃO ESTRUTURADOS E ESTÁVEIS
+=========================================================================
+
+O enunciado define, para cada entidade, um conjunto mínimo e fixo de
+atributos (paciente: nome, CPF, nascimento, telefone, endereço e e-mail;
+quarto: número, andar, capacidade e situação; e assim por diante). Todo
+paciente tem os mesmos campos, toda consulta tem os mesmos campos.
+
+A principal vantagem de um banco de documentos, como o MongoDB, é a
+flexibilidade de esquema: cada documento pode ter um formato diferente.
+Neste sistema essa flexibilidade não traz ganho. Pelo contrário: num
+cadastro hospitalar, um esquema fixo e validado pelo próprio banco
+(NOT NULL, tipos de dados, CHECK) é uma proteção, não uma limitação.
+
+
+=========================================================================
+3. O SISTEMA É FEITO DE RELACIONAMENTOS
+=========================================================================
+
+    Paciente    1 ---- N  Consulta    N ---- 1  Profissional da Saúde
+    Paciente    1 ---- N  Internação  N ---- 1  Quarto
+    Internação  N ---- 1  Profissional da Saúde (responsável)
+
+Consulta e Internação são, na prática, ligações entre outras entidades.
+As telas e as regras atravessam essas ligações o tempo todo: "consultas
+do dia de um médico, com o nome de cada paciente", "pacientes internados
+e seus quartos", "histórico do paciente com o nome de cada profissional".
+
+No modelo relacional cada informação fica guardada num lugar só, e as
+ligações são chaves estrangeiras consultadas com JOIN. No MongoDB, que não
+usa JOIN no dia a dia, seria preciso escolher entre:
+
+  - embutir dados (copiar o nome do médico dentro de cada consulta), o
+    que cria cópias que precisam ser mantidas sincronizadas; ou
+  - guardar só o identificador e fazer várias buscas no código, o que
+    reproduz o modelo relacional sem as garantias dele.
+
+
+=========================================================================
+4. AS REGRAS DE NEGÓCIO VIRAM GARANTIAS DO PRÓPRIO BANCO
+=========================================================================
+
+Este é o argumento principal. Num banco relacional, boa parte das regras
+do enunciado é declarada no esquema, e o banco recusa qualquer operação
+que as viole, venha ela da aplicação, de um script ou de duas requisições
+simultâneas. No MedVita:
+
+RN2 - Consulta associada a um profissional responsável e a um paciente
+  As colunas paciente_id e profissional_id são NOT NULL e chaves
+  estrangeiras. É impossível gravar uma consulta sem paciente ou ligada a
+  um profissional que não existe.
+
+RN3 - Um profissional não pode ter dois atendimentos no mesmo horário
+  Índice único parcial na tabela de consultas:
+
+      create unique index on consultas (profissional_id, data, horario)
+          where status <> 'CANCELADA';
+
+  Se dois pacientes clicarem em "Agendar" no mesmo instante e as duas
+  requisições passarem juntas pela verificação feita no Java, o banco
+  aceita só uma. Sem essa garantia, a regra dependeria apenas do código e
+  falharia exatamente no caso concorrente. Consultas canceladas ficam fora
+  do índice e liberam o horário.
+
+RN4 - Internação associada a um paciente e a um quarto disponível
+  Chaves estrangeiras (NOT NULL) para pacientes e quartos, e a verificação
+  de vaga feita na mesma transação que grava a internação.
+
+RN5 - Um quarto não pode ultrapassar sua capacidade máxima
+  Restrição CHECK (ocupacao_atual between 0 and capacidade_maxima) na
+  tabela de quartos. Além disso, o banco permite travar a linha do quarto
+  durante a internação (SELECT ... FOR UPDATE), para que duas internações
+  feitas ao mesmo tempo não ocupem o mesmo último leito.
+
+RN6 - Manter o histórico de consultas e internações
+  As chaves estrangeiras impedem apagar um paciente, profissional ou
+  quarto que tenha atendimentos ligados a ele, então o histórico não perde
+  referências por engano. Além disso, o histórico não precisa ser copiado
+  para uma estrutura separada: ele é obtido por consulta (JOIN) sobre as
+  próprias consultas e internações, e por isso está sempre de acordo com
+  os dados reais.
+
+RN7 - Respeitar a disponibilidade de recursos e a integridade dos dados
+  Integridade referencial e transações ACID são o núcleo do modelo
+  relacional.
+
+Unicidade: CPF do paciente, registro profissional, número do quarto e
+e-mail de login são restrições UNIQUE no banco.
+
+
+=========================================================================
+5. TRANSAÇÕES: OPERAÇÕES QUE ALTERAM VÁRIAS TABELAS
+=========================================================================
+
+Várias operações do sistema alteram mais de uma tabela e precisam
+acontecer por inteiro ou não acontecer:
+
+  - internar: grava a internação E ocupa um leito do quarto;
+  - dar alta: encerra a internação E libera o leito.
+
+Se a segunda parte falhar e a primeira ficar gravada, o quarto passa a
+mostrar uma ocupação errada. Bancos
+relacionais garantem atomicidade (ACID) de forma nativa, e no Spring isso
+é uma única anotação (@Transactional) nos services. O MongoDB oferece
+transações com vários documentos desde a versão 4.0, mas como recurso
+adicional, com mais custo e restrições, e não como o modo normal de
+trabalho do banco.
+
+
+=========================================================================
+6. ADERÊNCIA À ARQUITETURA PEDIDA
+=========================================================================
+
+  - O enunciado pede modelagem orientada a objetos e arquitetura em
+    camadas (Controller, Service, Repository, Model). O JPA mapeia cada
+    classe do modelo para uma tabela de forma direta, e as associações
+    (@ManyToOne) são as mesmas do diagrama de classes.
+  - O Histórico Médico não precisa de tabela própria: ele é montado a
+    partir das consultas e internações do paciente.
+  - O Spring Data JPA gera os repositories a partir de interfaces, como já
+    é feito no login do sistema (PacienteRepository).
+
+
+=========================================================================
+7. POR QUE POSTGRESQL E POR QUE NO SUPABASE
+=========================================================================
+
+PostgreSQL, em vez de MySQL:
+  - Suporta índices únicos parciais (com WHERE), usados na RN3 para que
+    consultas canceladas liberem o horário. O MySQL não tem índice
+    parcial; seria preciso contornar com uma coluna gerada.
+  - Restrições CHECK completas, tipos de data e hora precisos (date, time,
+    timestamptz) e licença livre.
+
+Supabase, como hospedagem do PostgreSQL:
+  - Banco gerenciado na nuvem, com plano gratuito: todos os integrantes
+    do grupo usam o MESMO banco, sem instalar nada localmente.
+  - Painel web para ver as tabelas e rodar SQL (SQL Editor), útil para
+    conferir os dados durante o desenvolvimento e a apresentação.
+  - O módulo de login reaproveitado no MedVita (TelaLogin + Supabase) já
+    foi construído e testado com essa mesma combinação: Spring Boot, JPA
+    e Supabase.
+  - Continua sendo um PostgreSQL comum: a aplicação conecta por JDBC
+    padrão, sem depender de bibliotecas do Supabase. Trocar de provedor
+    exige apenas mudar a URL de conexão no arquivo .env.
+  - Segurança: a API pública que o Supabase cria automaticamente fica
+    bloqueada (Row Level Security ligado e sem policies). Só a aplicação
+    Spring, que conecta como dona das tabelas, acessa os dados.
+
+
+=========================================================================
+8. QUANDO O MONGODB SERIA A MELHOR ESCOLHA
+=========================================================================
+
+Um banco de documentos se destaca quando os dados têm formato variável
+(cada registro com campos diferentes), quando são lidos quase sempre como
+um bloco único e isolado, ou quando o volume exige distribuir os dados
+entre muitos servidores. Nenhuma dessas situações descreve o MedVita: os
+formatos são fixos, as consultas cruzam entidades o tempo todo e o volume
+de um hospital de médio porte é atendido com folga por um único servidor
+PostgreSQL.
+
+
+=========================================================================
+9. CONCLUSÃO
+=========================================================================
+
+O banco relacional foi escolhido porque o domínio hospitalar é
+estruturado, altamente relacionado e regido por regras de integridade.
+Com o PostgreSQL, as regras de negócio 2 a 7 não ficam apenas no código:
+também são garantidas pelo próprio banco, por meio de chaves
+estrangeiras, restrições UNIQUE e CHECK, índice único parcial e
+transações ACID. Isso reduz erros operacionais, que é justamente um dos
+objetivos do sistema descrito no enunciado.

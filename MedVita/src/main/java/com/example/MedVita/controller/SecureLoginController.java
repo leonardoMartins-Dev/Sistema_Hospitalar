@@ -1,5 +1,8 @@
 package com.example.MedVita.controller;
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,25 +13,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.MedVita.config.UserConfig;
 import com.example.MedVita.service.PasswordRecoveryService;
 import com.example.MedVita.service.SendEmailService;
-import com.example.MedVita.service.UserService;
+import com.example.MedVita.service.PacienteService;
 
 @Controller
 public class SecureLoginController {
 
         private final UserConfig userConfig;
         private final SendEmailService sendEmailService;
-        private final UserService userService;
+        private final PacienteService pacienteService;
         private final PasswordRecoveryService passwordRecoveryService;
 
         public SecureLoginController(
                         UserConfig userConfig,
                         SendEmailService sendEmailService,
-                        UserService userService,
+                        PacienteService pacienteService,
                         PasswordRecoveryService passwordRecoveryService) {
 
                 this.userConfig = userConfig;
                 this.sendEmailService = sendEmailService;
-                this.userService = userService;
+                this.pacienteService = pacienteService;
                 this.passwordRecoveryService = passwordRecoveryService;
         }
 
@@ -191,34 +194,31 @@ public class SecureLoginController {
                         @RequestParam("cpf") String cpf,
                         @RequestParam("endereco") String endereco,
                         @RequestParam("telefone") String telefone,
-                        @RequestParam("dataNascimento") String dataNascimento,
+                        @RequestParam("dataNascimento") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNascimento,
                         @RequestParam("senha") String senha) {
 
-                if (userService.exists(email)) {
+                if (pacienteService.existe(email)) {
 
                         System.out.println(
                                         "Usuário já cadastrado: " + email);
 
-                        return "redirect:/register";
+                        return "redirect:/register?erro=email";
                 }
 
-                userService.createUser(
+                pacienteService.cadastrar(
                                 email,
                                 senha,
-                                nome);
+                                nome,
+                                cpf,
+                                telefone,
+                                endereco,
+                                dataNascimento);
 
                 System.out.println(
                                 "Usuário cadastrado: " + email);
 
                 System.out.println(
                                 "Nome cadastrado: " + nome);
-
-                /*
-                 * CPF, endereço, telefone e data de nascimento
-                 * ainda não estão sendo armazenados, pois o
-                 * projeto atualmente utiliza usuários em
-                 * memória.
-                 */
 
                 return "redirect:/login?cadastro=sucesso";
         }
@@ -236,7 +236,7 @@ public class SecureLoginController {
         public String handleRecoverPassword(
                         @RequestParam("email") String email) {
 
-                if (!userService.exists(email)) {
+                if (!pacienteService.existe(email)) {
 
                         System.out.println(
                                         "E-mail não encontrado: " + email);
@@ -244,7 +244,7 @@ public class SecureLoginController {
                         return "redirect:/recoverpassword?erro=email";
                 }
 
-                String nome = userService.getName(email);
+                String nome = pacienteService.buscarNome(email);
 
                 if (nome == null || nome.isBlank()) {
                         nome = email;
@@ -319,7 +319,7 @@ public class SecureLoginController {
                         return "redirect:/login?erro=token";
                 }
 
-                userService.updatePassword(
+                pacienteService.atualizarSenha(
                                 email,
                                 senha);
 
