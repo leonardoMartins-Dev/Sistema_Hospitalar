@@ -1,0 +1,26 @@
+digraph G {
+  rankdir=BT; splines=true; nodesep=0.55; ranksep=0.9; pad=0.4;
+  labelloc=t; fontsize=24; fontname="DejaVu Sans"; label=<<B>MedVita — Diagrama de Classes: Exceções e Tratamento de Erros</B>>;
+  node [fontname="DejaVu Sans" fontsize=12];
+  edge [fontname="DejaVu Sans" fontsize=11 color="#333333" labeldistance=2.2];
+  ranksep=1.0;
+RTE [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#F1F1F1" COLOR="#777777" STYLE="solid"><TR><TD ALIGN="CENTER" CELLPADDING="6"><B>RuntimeException</B></TD></TR></TABLE>>];
+SendEx [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E3EEFB" COLOR="#2B5C9E" STYLE="solid"><TR><TD ALIGN="CENTER" CELLPADDING="6"><B>SendEmailException</B></TD></TR><HR/><TR><TD ALIGN="LEFT" BALIGN="LEFT">+SendEmailException(message: String)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+NotFound [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#FFF4D6" COLOR="#B7791F" STYLE="dashed"><TR><TD ALIGN="CENTER" CELLPADDING="6"><B>RecursoNaoEncontradoException</B><BR/><FONT POINT-SIZE="10">→ HTTP 404</FONT></TD></TR></TABLE>>];
+Regra [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#FFF4D6" COLOR="#B7791F" STYLE="dashed"><TR><TD ALIGN="CENTER" CELLPADDING="6"><B>RegraNegocioException</B><BR/><FONT POINT-SIZE="10">→ HTTP 400</FONT></TD></TR></TABLE>>];
+Handler [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E3EEFB" COLOR="#2B5C9E" STYLE="solid"><TR><TD ALIGN="CENTER" CELLPADDING="6">«ControllerAdvice»<BR/><B>GlobalExceptionHandler</B></TD></TR><HR/><TR><TD ALIGN="LEFT" BALIGN="LEFT">-log: Logger  {static}<BR ALIGN="LEFT"/></TD></TR><HR/><TR><TD ALIGN="LEFT" BALIGN="LEFT">+handleEmailSendException(ex: SendEmailException): ResponseEntity&lt;Object&gt;<BR ALIGN="LEFT"/>+handleGenericException(ex: Exception): ResponseEntity&lt;Object&gt;<BR ALIGN="LEFT"/>+(futuro) handler de RecursoNaoEncontradoException<BR ALIGN="LEFT"/>+(futuro) handler de RegraNegocioException<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+Mail [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E3EEFB" COLOR="#2B5C9E" STYLE="solid"><TR><TD ALIGN="CENTER" CELLPADDING="6">«Service»<BR/><B>SendEmailService</B><BR/><FONT POINT-SIZE="10">lança em caso de falha</FONT></TD></TR></TABLE>>];
+Svcs [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#FFF4D6" COLOR="#B7791F" STYLE="dashed"><TR><TD ALIGN="CENTER" CELLPADDING="6">«ConsultaService, InternacaoService,
+QuartoService, ProfissionalSaudeService»<BR/><B>Services do hospital</B></TD></TR></TABLE>>];
+{rank=same; SendEx; NotFound; Regra;}
+SendEx -> RTE [arrowhead=empty];
+NotFound -> RTE [arrowhead=empty];
+Regra -> RTE [arrowhead=empty];
+Handler -> SendEx [style=dashed arrowhead=vee label=<trata (HTTP 500)>];
+Handler -> NotFound [style=dashed arrowhead=vee label=<trata> style=dashed];
+Handler -> Regra [style=dashed arrowhead=vee label=<trata> style=dashed];
+Mail -> SendEx [style=dashed arrowhead=vee label=<lança>];
+Svcs -> NotFound [style=dashed arrowhead=vee label=<lançam>];
+Svcs -> Regra [style=dashed arrowhead=vee label=<lançam>];
+legend [shape=plaintext label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#999999"><TR><TD COLSPAN="2" ALIGN="LEFT"><B>Legenda</B></TD></TR><TR><TD WIDTH="26" BGCOLOR="#E3EEFB" COLOR="#2B5C9E" STYLE="solid" BORDER="1"> </TD><TD ALIGN="LEFT">Classe implementada no código</TD></TR><TR><TD WIDTH="26" BGCOLOR="#FFF4D6" COLOR="#B7791F" STYLE="dashed" BORDER="1"> </TD><TD ALIGN="LEFT">Classe só documentada no código (a implementar)</TD></TR><TR><TD WIDTH="26" BGCOLOR="#F1F1F1" COLOR="#777777" STYLE="solid" BORDER="1"> </TD><TD ALIGN="LEFT">Classe/interface de framework (Spring, JDK)</TD></TR></TABLE>>];
+}
