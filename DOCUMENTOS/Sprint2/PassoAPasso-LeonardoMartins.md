@@ -9,14 +9,14 @@ Este guia está **na ordem em que você deve fazer**. Cada passo diz o arquivo, 
 ## Resumo (para ir marcando)
 
 **Fase 0: preparação**
-- [ ] Passo 0: subir a documentação da Sprint 2 para a `main`
+- [x] Passo 0: subir a documentação da Sprint 2 para a `main`
 
 **Fase 1: contratos (até o 2º dia; os outros esperam por isso)**
-- [ ] Passo 1: exceções
-- [ ] Passo 2: enums
-- [ ] Passo 3: `ProfissionalSaude`
-- [ ] Passo 4: as 3 subclasses
-- [ ] Passo 5: `ProfissionalSaudeRepository`
+- [x] Passo 1: exceções
+- [x] Passo 2: enums
+- [x] Passo 3: `ProfissionalSaude`
+- [x] Passo 4: as 3 subclasses
+- [x] Passo 5: `ProfissionalSaudeRepository`
 - [ ] Passo 6: conferir, PR e avisar o grupo
 
 **Fase 2: regras e API**
