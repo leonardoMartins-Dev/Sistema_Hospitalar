@@ -42,6 +42,25 @@ import com.example.MedVita.service.RecaptchaService;
  * encontra sozinho esse bean (único UserDetailsService) e o PasswordEncoder
  * abaixo, e monta a autenticação com os dois. Por isso não há nenhum bean de
  * usuários aqui.
+ *
+ * =========================================================
+ * A CRIAR (Sprint 2, responsável: João Pedro)
+ * =========================================================
+ * 1) @EnableMethodSecurity na classe, para os controllers poderem usar
+ *    @PreAuthorize("hasRole('MEDICO')") etc. em cada rota da API.
+ * 2) As rotas da API (/pacientes, /profissionais, /consultas, /internacoes,
+ *    /quartos, /historico) já exigem login pelo anyRequest().authenticated().
+ *    A API é testada só pelas telas (decisão do grupo), então o login
+ *    continua sendo o do formulário, com sessão. Não precisa de httpBasic.
+ * 3) O CSRF continua LIGADO. Por isso os fetch de POST/PUT/DELETE das telas
+ *    precisam mandar o token: cada página coloca no <head>
+ *      <meta name="_csrf" th:content="${_csrf.token}"/>
+ *      <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+ *    e o static/js/api.js lê essas duas tags e manda o cabeçalho.
+ * 4) Liberar GET /js/** (permitAll), igual a /css/**, para o api.js carregar.
+ * 5) Opcional: nas rotas da API, responder 401 em vez de redirecionar para
+ *    /login quando a sessão expirar (exceptionHandling com
+ *    defaultAuthenticationEntryPointFor).
  */
 @Configuration
 @EnableWebSecurity

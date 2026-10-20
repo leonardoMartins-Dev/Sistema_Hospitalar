@@ -23,9 +23,16 @@ import com.example.MedVita.models.Paciente;
  *   2. PACIENTE -> da tabela "pacientes" do Supabase (cadastro pela página
  *                  /register).
  *   3. MÉDICO   -> da tabela "profissionais_saude" (cadastro pelo admin na
- *                  página /admin/medicos). AINDA NÃO IMPLEMENTADO: quando o
- *                  ProfissionalSaude existir, entra aqui um passo a mais,
- *                  antes do "não encontrado", devolvendo .roles("MEDICO").
+ *                  página /admin/medicos).
+ *                  A CRIAR (Sprint 2, responsável: João Pedro): se o e-mail
+ *                  não for de paciente, procurar com
+ *                  profissionalSaudeService.buscarPorEmail(username) e, se
+ *                  achar, devolver .roles("MEDICO"). Vale para as três
+ *                  categorias (clínico, especialista e cirurgião): todas
+ *                  entram na área /medico. O orElseThrow do paciente vira um
+ *                  if/else (ou Optional.or) para tentar as duas tabelas antes
+ *                  do "não encontrado". O construtor passa a receber também
+ *                  o ProfissionalSaudeService.
  *
  * USUÁRIOS DE TESTE (TEMPORÁRIO): enquanto o banco não funciona, um paciente
  * e um médico também vêm do application.properties (app.teste.*), conferidos

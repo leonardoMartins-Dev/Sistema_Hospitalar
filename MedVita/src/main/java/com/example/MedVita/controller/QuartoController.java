@@ -2,21 +2,28 @@ package com.example.MedVita.controller;
 
 /*
  * =========================================================
- * CONTROLLER DE QUARTOS  (/api/quartos)
+ * CONTROLLER DE QUARTOS  (/quartos)
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
- * @RestController: devolve dados em JSON (a API REST pedida no enunciado).
- * As páginas HTML continuam sendo abertas pelo SecureLoginController; elas
- * buscam e enviam os dados para os endereços abaixo.
+ * @RestController @RequestMapping("/quartos"): devolve JSON.
  *
  * ROTAS
- *   GET  /api/quartos              -> todos (tela medico/quartos)
- *   GET  /api/quartos/disponiveis  -> só os com vaga (escolher na internação)
- *   POST /api/quartos              -> cadastrar (botão "Cadastrar Quarto")
+ *   GET  /quartos                          todos (tela medico/quartos)
+ *   GET  /quartos?tipo=UTI                 filtro por tipo
+ *   GET  /quartos?disponivel=true          só os com vaga (select da internação)
+ *        (tipo e disponivel podem ir juntos; @RequestParam(required = false))
+ *   GET  /quartos/tipos                    lista do enum TipoQuarto (para o select)
+ *   GET  /quartos/{id}                     um quarto
+ *   POST /quartos                          body: {numero, andar, capacidadeMaxima, tipo} -> 201
  *
  * QUEM PODE: MEDICO e ADMIN.
+ *
+ * ERROS
+ *   número repetido ou capacidade fora do limite do tipo -> 400 (RegraNegocioException)
+ *
  * USA: QuartoService
  */

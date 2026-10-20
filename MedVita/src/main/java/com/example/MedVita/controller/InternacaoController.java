@@ -2,25 +2,31 @@ package com.example.MedVita.controller;
 
 /*
  * =========================================================
- * CONTROLLER DE INTERNAÇÕES  (/api/internacoes)
+ * CONTROLLER DE INTERNAÇÕES  (/internacoes)
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
- * @RestController: devolve dados em JSON (a API REST pedida no enunciado).
- * As páginas HTML continuam sendo abertas pelo SecureLoginController; elas
- * buscam e enviam os dados para os endereços abaixo.
+ * @RestController @RequestMapping("/internacoes"): devolve JSON.
  *
  * ROTAS
- *   POST /api/internacoes            -> internar (botão "Registrar Internação"
- *                                       da tela medico/internacoes)
- *   GET  /api/internacoes            -> quem está internado agora
- *                                       (tela medico/internacoes)
- *   GET  /api/internacoes/minhas     -> internações do paciente logado
- *                                       (tela paciente/internacoes)
- *   PUT  /api/internacoes/{id}/alta  -> dar alta
+ *   POST /internacoes                body: InternacaoRequest -> 201   (MEDICO)
+ *                                    (botão "Registrar Internação" de medico/internacoes)
+ *   GET  /internacoes?status=ATIVA   quem está internado agora (MEDICO, ADMIN)
+ *                                    sem status: todas
+ *   GET  /internacoes/minhas         do paciente logado (tela paciente/internacoes)
+ *   GET  /internacoes/{id}           uma internação
+ *   PUT  /internacoes/{id}/alta      body: {"dataEfetivaAlta": "2026-11-15",
+ *                                           "observacoes": "..."}   (MEDICO)
+ *                                    record AltaRequest dentro do controller
  *
- * QUEM PODE: internar e dar alta, só MEDICO.
- * USA: InternacaoService
+ * QUEM PODE: internar e dar alta, só MEDICO (@PreAuthorize).
+ *
+ * ERROS
+ *   quarto lotado, paciente já internado, datas inválidas -> 400
+ *   paciente, profissional ou quarto inexistente          -> 404
+ *
+ * USA: InternacaoService, PacienteService (paciente logado)
  */

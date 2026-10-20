@@ -6,21 +6,35 @@ package com.example.MedVita.models;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
- * Requisito 6 do enunciado: consultar o histórico de um paciente, com as
- * consultas realizadas, as internações e as informações registradas nos
- * atendimentos (as observações).
+ * O histórico de um paciente: atendimentos concluídos, internações e as
+ * observações registradas neles (RN6).
  *
  * NÃO É UMA TABELA
- * Diferente dos outros models, este não tem @Entity. O histórico já está no
- * banco: são as consultas e internações do paciente, que nunca são apagadas
- * (RN6). Esta classe só junta tudo num objeto para mostrar na tela.
+ * Não tem @Entity. O histórico já está no banco: são os atendimentos e as
+ * internações do paciente, que nunca são apagados. Esta classe só junta tudo
+ * num objeto para devolver no JSON.
  *
- * CAMPOS
+ * O QUE MUDOU NA SPRINT 2
+ * List<Consulta> virou List<Atendimento>: o histórico agora mostra todas as
+ * modalidades concluídas (rotina, especializada, emergência e cirurgia).
+ *
+ * =========================================================
+ * A CRIAR
+ * =========================================================
+ * CAMPOS (private final + getters, sem setters: é só leitura)
  *   Paciente paciente
- *   List<Consulta> consultas       só as REALIZADAS (com as observações médicas)
- *   List<Internacao> internacoes   todas (com as observações)
+ *   List<Atendimento> atendimentos   só os concluídos (atendimento.isConcluido()),
+ *                                    do mais recente para o mais antigo
+ *   List<Internacao> internacoes     todas, da mais recente para a mais antiga
+ *
+ * CONSTRUTOR
+ *   public HistoricoMedico(paciente, atendimentos, internacoes)
+ *
+ * No JSON, cada atendimento traz "tipo" (getTipo()), então a tela sabe
+ * mostrar "Consulta de rotina", "Procedimento cirúrgico" etc.
  *
  * QUEM MONTA: HistoricoMedicoService.
  * TELA: paciente/historico (e o médico, ao consultar um paciente)
