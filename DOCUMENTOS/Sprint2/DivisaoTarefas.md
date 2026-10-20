@@ -216,6 +216,8 @@ Troquem as partes entre vocês se quiserem; basta atualizar a linha `RESPONSÁVE
 ### Leonardo Martins: Pessoas e acesso (profissionais, pacientes, login, exceções)
 Não depende de ninguém. Os outros dependem dos seus contratos, então eles saem primeiro.
 
+Passo a passo detalhado: [PassoAPasso-LeonardoMartins.md](PassoAPasso-LeonardoMartins.md).
+
 **Back (contratos, fase 1)**
 - [ ] `models/ProfissionalSaude.java` (abstrata, `podeRealizar`, `podeEncaminhar`, `verificarSePodeRealizar`)
 - [ ] `models/MedicoClinicoGeral.java`, `models/MedicoEspecialista.java`, `models/Cirurgiao.java`

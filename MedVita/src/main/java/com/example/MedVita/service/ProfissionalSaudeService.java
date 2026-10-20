@@ -53,5 +53,7 @@ package com.example.MedVita.service;
  *       consultar atendimentos nem internações, e não depende dessas partes.
  *       O flush() força o DELETE a acontecer dentro do try.
  *
- *   List<Especialidade> listarEspecialidades()   -> Arrays.asList(Especialidade.values())
+ *   List<Map<String, String>> listarEspecialidades()
+ *       -> [{"valor": "CARDIOLOGIA", "nome": "Cardiologia"}, ...] para os selects:
+ *          "valor" é o que a tela manda de volta; "nome" é o que aparece.
  */

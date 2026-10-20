@@ -20,7 +20,8 @@ package com.example.MedVita.controller;
  *   GET    /profissionais?especialidade=CARDIOLOGIA    especialistas da área
  *          Os filtros são @RequestParam(required = false) e vão para
  *          profissionalSaudeService.buscar(categoria, especialidade).
- *   GET    /profissionais/especialidades               lista do enum (para os selects)
+ *   GET    /profissionais/especialidades               [{"valor": "CARDIOLOGIA", "nome": "Cardiologia"}, ...]
+ *                                                      (para os selects)
  *   GET    /profissionais/{id}                         um profissional
  *   POST   /profissionais                              body: ProfissionalRequest -> 201   (ADMIN)
  *   DELETE /profissionais/{id}                         -> 204                            (ADMIN)
