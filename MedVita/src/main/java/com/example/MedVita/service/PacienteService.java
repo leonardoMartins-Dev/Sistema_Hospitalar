@@ -36,10 +36,10 @@ import com.example.MedVita.repository.PacienteRepository;
  *   atualizarSenha() -> grava a nova senha no fluxo "esqueci minha senha"
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
- * Façam o buscarPorId() PRIMEIRO: ConsultaService, InternacaoService e
- * HistoricoMedicoService dependem dele.
+ * Ninguém depende destes métodos novos: os outros services usam
+ * PacienteRepository.findById e o buscarPorEmail que já existe.
  *   - No cadastrar(): recusar CPF repetido com
  *     pacienteRepository.existsByCpf(...) e lançar RegraNegocioException.
  *     Hoje só o e-mail é conferido; o banco já recusa CPF repetido
@@ -51,8 +51,7 @@ import com.example.MedVita.repository.PacienteRepository;
  *          devolve todos
  *   - Paciente buscarPorId(Long id)
  *       -> lança RecursoNaoEncontradoException se não existir (botão
- *          "Ver ficha" da tela medico/pacientes, ConsultaService,
- *          InternacaoService e HistoricoMedicoService)
+ *          "Ver ficha" da tela medico/pacientes)
  */
 @Service
 public class PacienteService {

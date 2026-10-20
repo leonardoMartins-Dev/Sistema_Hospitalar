@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * "Ocorreu um erro inesperado" e não haveria como descobrir a causa.
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: Leonardo Gonzaga, no primeiro dia)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  * Um método @ExceptionHandler para cada caso, no mesmo formato dos de cima
  * (Map com "timestamp" e "message"):

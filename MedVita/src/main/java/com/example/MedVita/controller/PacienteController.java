@@ -6,7 +6,7 @@ package com.example.MedVita.controller;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: João Pedro (Sprint 2)
+ * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * O QUE É
  * @RestController @RequestMapping("/pacientes"): devolve JSON.

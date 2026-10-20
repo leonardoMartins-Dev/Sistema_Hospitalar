@@ -44,7 +44,7 @@ import com.example.MedVita.service.RecaptchaService;
  * usuários aqui.
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  * 1) @EnableMethodSecurity na classe, para os controllers poderem usar
  *    @PreAuthorize("hasRole('MEDICO')") etc. em cada rota da API.

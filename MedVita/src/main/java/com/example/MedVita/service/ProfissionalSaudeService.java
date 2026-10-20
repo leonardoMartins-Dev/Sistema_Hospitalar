@@ -6,14 +6,13 @@ package com.example.MedVita.service;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: João Pedro (Sprint 2)
+ * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
- * USA: ProfissionalSaudeRepository, AtendimentoRepository (disponibilidade e
- *      remoção), InternacaoRepository (remoção), PacienteService (e-mail
- *      repetido), PasswordEncoder (BCrypt)
- *
- * NÃO usa o ConsultaService: o ConsultaService já usa este service, e um
- * service usando o outro dos dois lados dá dependência circular no Spring.
+ * USA: ProfissionalSaudeRepository, PacienteService (e-mail repetido; também
+ *      desta parte), PasswordEncoder (BCrypt)
+ * NÃO usa nada de consultas, emergência ou internações: esta parte não
+ * depende de ninguém. Os outros services também não usam este: vão direto
+ * no ProfissionalSaudeRepository.
  *
  * MÉTODOS
  *   @Transactional
@@ -30,27 +29,29 @@ package com.example.MedVita.service;
  *        Sempre com passwordEncoder.encode(req.senha()).
  *     5. save.
  *
- *   List<ProfissionalSaude> buscar(CategoriaProfissional categoria, Especialidade especialidade,
- *                                  LocalDate data, LocalTime horario)
+ *   List<ProfissionalSaude> buscar(CategoriaProfissional categoria, Especialidade especialidade)
  *     Atende o GET /profissionais com filtros opcionais:
  *       - especialidade informada -> repository.buscarEspecialistas(especialidade)
+ *         ("consulta dos profissionais por área de atuação")
  *       - senão, findAll(); categoria informada -> filtra por p.getCategoria() == categoria
- *       - data E horário informados -> tira quem está ocupado naquele horário:
- *           atendimentoRepository.findByProfissionalIdAndDataAndHorario(p.getId(), data, horario)
- *               .stream().anyMatch(Atendimento::ocupaAgenda)
- *         Esse é o "profissionais DISPONÍVEIS por área de atuação" do enunciado.
+ *     Quem está LIVRE num horário é outra pergunta, respondida pela parte de
+ *     consultas (GET /consultas/profissionais-disponiveis).
  *
  *   ProfissionalSaude buscarPorId(Long id)       -> RecursoNaoEncontradoException
  *   Optional<ProfissionalSaude> buscarPorEmail(String email)
- *       -> login do médico (DatabaseUserDetailsService) e "médico logado"
- *          nos controllers. Normalize o e-mail antes de buscar.
+ *       -> login do médico (DatabaseUserDetailsService). Normalize o e-mail.
  *
  *   @Transactional
  *   void remover(Long id)                        só o ADMIN
- *       Se atendimentoRepository.existsByProfissionalId(id) ou
- *       internacaoRepository.existsByProfissionalId(id) ->
- *       RegraNegocioException("Profissional com atendimentos não pode ser
- *       removido") (RN6: o histórico não pode perder referências).
+ *       - buscarPorId(id) (404 se não existir)
+ *       - try { repository.delete(p); repository.flush(); }
+ *         catch (DataIntegrityViolationException e) {
+ *             throw new RegraNegocioException("Profissional com atendimentos ou
+ *                 internações não pode ser removido"); }
+ *       Quem impede a remoção é a chave estrangeira do banco (RN6, como diz a
+ *       JustificativaBancoRelacional). Por isso este service não precisa
+ *       consultar atendimentos nem internações, e não depende dessas partes.
+ *       O flush() força o DELETE a acontecer dentro do try.
  *
  *   List<Especialidade> listarEspecialidades()   -> Arrays.asList(Especialidade.values())
  */

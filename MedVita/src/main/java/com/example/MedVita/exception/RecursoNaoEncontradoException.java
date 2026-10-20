@@ -6,7 +6,7 @@ package com.example.MedVita.exception;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2), no PRIMEIRO dia: todo mundo usa.
+ * RESPONSÁVEL: Leonardo Martins (Sprint 2), nos PRIMEIROS DIAS: todo mundo usa.
  *
  * QUANDO É LANÇADA
  * Quando um service procura algo pelo id e não acha.

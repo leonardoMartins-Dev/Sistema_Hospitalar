@@ -2,58 +2,59 @@ package com.example.MedVita.service;
 
 /*
  * =========================================================
- * SERVIÇO DE CONSULTAS  (cuida das QUATRO modalidades de atendimento)
+ * SERVIÇO DE CONSULTAS
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: Leonardo Martins (Sprint 2)
- *              Partes marcadas com [GONZAGA]: Leonardo Gonzaga
+ * RESPONSÁVEL: João Pedro (Sprint 2)
  *
- * O nome continua ConsultaService porque o endpoint é /consultas (decisão do
- * grupo), mas ele trabalha com Atendimento: rotina, especializada,
- * emergência e cirurgia.
+ * Cria as consultas (rotina e especializada) e cuida dos fluxos GENÉRICOS
+ * de qualquer atendimento (iniciar, concluir, cancelar, buscar). Os fluxos
+ * genéricos funcionam também para emergência e cirurgia SEM este service
+ * conhecer essas classes: ele só chama os métodos abstratos de Atendimento.
+ * O que é só de emergência ou cirurgia fica no EmergenciaCirurgiaService
+ * (Leonardo Gonzaga), em outro arquivo.
  *
- * USA: AtendimentoRepository, PacienteService, ProfissionalSaudeService
+ * USA (só repositórios, para não depender do service de ninguém)
+ *   AtendimentoRepository          (desta parte)
+ *   PacienteRepository             (já existe) -> findById
+ *   PacienteService.buscarPorEmail (já existe) -> paciente logado
+ *   ProfissionalSaudeRepository    (Leonardo Martins) -> findById, findByEmail,
+ *                                   buscarEspecialistas
  *
  * =========================================================
- * CRIAR UM ATENDIMENTO
+ * CRIAR UMA CONSULTA
  * =========================================================
  *   @Transactional
- *   Atendimento criar(AtendimentoRequest req)
- *     1. paciente = pacienteService.buscarPorId(req.pacienteId())
- *     2. Cria a subclasse certa. ESTE É O ÚNICO switch POR TIPO DO SERVICE
- *        (criar objeto é o único lugar onde é preciso saber a classe):
+ *   Consulta criar(ConsultaRequest req)
+ *     1. paciente = pacienteRepository.findById(req.pacienteId())
+ *                   .orElseThrow(() -> new RecursoNaoEncontradoException(...))
+ *        profissional = profissionalSaudeRepository.findById(...) (idem)
+ *     2. Cria a subclasse certa (o único switch por tipo deste service):
  *          ROTINA        -> new ConsultaRotina(paciente, profissional, data, horario, motivo)
  *          ESPECIALIZADA -> new ConsultaEspecializada(..., req.especialidade())
- *          EMERGENCIA    -> [GONZAGA] new AtendimentoEmergencia(paciente, motivo, prioridade)
- *          CIRURGIA      -> [GONZAGA] new ProcedimentoCirurgico(paciente, profissional,
- *                              data, horario, descricao, tipoCirurgia, obsPre)
- *        (profissional = profissionalService.buscarPorId(req.profissionalId()),
- *         menos na emergência)
- *     3. atendimento.validar()   cada modalidade confere as próprias regras
- *     4. Se atendimento.ocupaAgenda() e horarioOcupado(...) ->
- *        RegraNegocioException("O profissional já tem atendimento neste horário")   (RN3)
- *     5. return atendimentoRepository.save(atendimento)
+ *          outro tipo    -> RegraNegocioException("Emergência e cirurgia usam
+ *                           /consultas/emergencias e /consultas/cirurgias")
+ *     3. consulta.validar()   (a modalidade confere as próprias regras)
+ *     4. horarioOcupado(...) -> RegraNegocioException("O profissional já tem
+ *        atendimento neste horário")   (RN3)
+ *     5. return atendimentoRepository.save(consulta)
  *
  *   private boolean horarioOcupado(Long profissionalId, LocalDate data, LocalTime horario)
  *       atendimentoRepository.findByProfissionalIdAndDataAndHorario(...)
  *           .stream().anyMatch(Atendimento::ocupaAgenda)
  *
  * =========================================================
- * MUDAR A SITUAÇÃO (polimorfismo: nenhum if por tipo aqui)
+ * FLUXOS GENÉRICOS (valem para as 4 modalidades; nenhum if por tipo)
  * =========================================================
  * Todos são @Transactional, buscam com buscarPorId(id), chamam o método do
- * model e salvam. Quem decide se pode é o próprio model, que lança
+ * model e salvam. Quem decide se pode é o model, que lança
  * RegraNegocioException se a mudança não for permitida.
+ *   iniciar(Long id)                       -> atendimento.iniciar()
+ *   concluir(Long id, String observacoes)  -> atendimento.concluir(observacoes)
+ *   cancelar(Long id)                      -> atendimento.cancelar()
  *
- *   iniciar(Long id, Long profissionalId)
- *       [GONZAGA] if (atendimento instanceof AtendimentoEmergencia e && profissionalId != null)
- *                     e.atribuirProfissional(profissionalService.buscarPorId(profissionalId));
- *       atendimento.iniciar();
- *   concluir(Long id, String observacoes)   -> atendimento.concluir(observacoes)
- *   cancelar(Long id)                       -> atendimento.cancelar()
- *
- * SÓ PARA CONSULTAS (rotina e especializada)
+ * SÓ PARA CONSULTAS
  *   private Consulta comoConsulta(Atendimento a)
  *       if (!(a instanceof Consulta c)) lança RegraNegocioException(
  *           "Esta operação só vale para consultas");
@@ -62,16 +63,15 @@ package com.example.MedVita.service;
  *   reagendar(Long id, LocalDate data, LocalTime horario)
  *       Consulta nova = comoConsulta(a).reagendar(data, horario);
  *       nova.validar(); confere a RN3; salva a NOVA. A antiga não muda.
- *
- * SÓ PARA CONSULTA DE ROTINA
  *   encaminhar(Long id, Especialidade especialidade, String emailMedicoLogado)
  *       - o atendimento tem que ser ConsultaRotina; senão RegraNegocioException
- *       - o médico logado (profissionalService.buscarPorEmail) tem que ser
- *         MedicoClinicoGeral; senão RegraNegocioException
- *       - medico.encaminhar(consulta, especialidade); salva
+ *       - solicitante = profissionalSaudeRepository.findByEmail(emailMedicoLogado)
+ *       - rotina.registrarEncaminhamento(especialidade, solicitante); salva
+ *         (o model confere se o solicitante é o médico da consulta e se
+ *         solicitante.podeEncaminhar())
  *
  * =========================================================
- * CONSULTAS (LEITURA)
+ * LEITURAS
  * =========================================================
  *   Atendimento buscarPorId(Long id)  -> RecursoNaoEncontradoException se não existir
  *   List<Atendimento> listar(TipoAtendimento tipo)
@@ -79,13 +79,16 @@ package com.example.MedVita.service;
  *   List<Atendimento> listarDoPaciente(Long pacienteId)       -> tela paciente/consultas
  *   List<Atendimento> agendaDoProfissional(Long profissionalId, LocalDate data)
  *                                                             -> tela medico/consultas
- *   [GONZAGA] List<AtendimentoEmergencia> filaEmergencia(StatusEmergencia status)
- *       -> status null = AGUARDANDO_AVALIACAO; ordena CRITICA primeiro e
- *          depois por chegada (ver o Comparator no enum Prioridade)
- *   [GONZAGA] List<ProcedimentoCirurgico> listarProcedimentosDoCirurgiao(Long cirurgiaoId)
- *       -> confere que o profissional existe e é Cirurgiao (senão
- *          RegraNegocioException) e chama
- *          atendimentoRepository.buscarProcedimentosDoCirurgiao(...)
+ *   List<ProfissionalSaude> profissionaisDisponiveis(Especialidade especialidade,
+ *                                                    LocalDate data, LocalTime horario)
+ *       -> select de médicos da tela de agendamento ("profissionais disponíveis
+ *          por área de atuação"):
+ *          - especialidade null (consulta de rotina): profissionalSaudeRepository.findAll()
+ *            filtrado por p.getCategoria() == CLINICO_GERAL
+ *          - senão: profissionalSaudeRepository.buscarEspecialistas(especialidade)
+ *          - tira quem está com horarioOcupado(p.getId(), data, horario)
+ *          Fica aqui (e não em profissionais) porque quem conhece a agenda são
+ *          os atendimentos.
  *
  * CONCORRÊNCIA
  * Se dois pedidos passarem juntos pela RN3, o índice único do banco recusa o

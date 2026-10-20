@@ -46,7 +46,7 @@ import jakarta.persistence.Table;
  * supabase/schema.sql. Se mudar algum campo aqui, mude também no banco.
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  * A Sprint 2 não muda o paciente. Os atributos do Requisito 1 já estão todos
  * aqui. Falta só:

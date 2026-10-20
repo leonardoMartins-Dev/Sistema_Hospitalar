@@ -24,8 +24,8 @@ import com.example.MedVita.models.Paciente;
  *                  /register).
  *   3. MÉDICO   -> da tabela "profissionais_saude" (cadastro pelo admin na
  *                  página /admin/medicos).
- *                  A CRIAR (Sprint 2, responsável: João Pedro): se o e-mail
- *                  não for de paciente, procurar com
+ *                  A CRIAR (Sprint 2, responsável: Leonardo Martins): se o
+ *                  e-mail não for de paciente, procurar com
  *                  profissionalSaudeService.buscarPorEmail(username) e, se
  *                  achar, devolver .roles("MEDICO"). Vale para as três
  *                  categorias (clínico, especialista e cirurgião): todas
