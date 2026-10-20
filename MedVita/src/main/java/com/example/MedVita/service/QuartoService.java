@@ -6,16 +6,24 @@ package com.example.MedVita.service;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * USA: QuartoRepository
  *
  * MÉTODOS
- *   cadastrar(numero, andar, capacidadeMaxima)
- *       Número repetido ou capacidade menor que 1 -> RegraNegocioException.
- *       O quarto começa com ocupação 0.
- *   listar()              -> tela medico/quartos
- *   listarDisponiveis()   -> só os que têm vaga, para escolher na internação (RN4)
- *   buscarPorId(id)       -> RecursoNaoEncontradoException se não existir
+ *   Quarto cadastrar(Quarto quarto)
+ *       - número repetido -> RegraNegocioException
+ *       - quarto.validar()   (tipo obrigatório e limite de leitos do tipo)
+ *       - a ocupação começa em 0 (ignore o que vier no JSON)
+ *       - save
+ *   List<Quarto> listar(TipoQuarto tipo, Boolean disponivel)
+ *       - tipo informado -> findByTipoOrderByAndarAscNumeroAsc(tipo)
+ *       - senão          -> findAllByOrderByAndarAscNumeroAsc()
+ *       - disponivel = true -> filtra por quarto.temVaga()
+ *   List<Quarto> listarDisponiveis()   -> repository.buscarDisponiveis() (RN4)
+ *   Quarto buscarPorId(Long id)        -> RecursoNaoEncontradoException
+ *   List<TipoQuarto> listarTipos()     -> Arrays.asList(TipoQuarto.values())
  *
- * A ocupação NÃO muda aqui: só no InternacaoService (internar e dar alta).
+ * A ocupação NÃO muda aqui: só pelo InternacaoService (internar e dar alta),
+ * chamando quarto.ocupar() e quarto.liberar().
  */

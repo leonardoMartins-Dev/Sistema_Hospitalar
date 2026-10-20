@@ -3,6 +3,15 @@
 -- Rode no Supabase: SQL Editor > New query > cole tudo > Run
 -- =========================================================
 
+-- =========================================================
+-- SPRINT 2: ESTE SCRIPT PRECISA SER ATUALIZADO
+-- Responsável: Leonardo Gonzaga. O que muda, tabela por tabela, está em
+-- DOCUMENTOS/Sprint2/DivisaoTarefas.md (seção "Banco de dados").
+-- Resumo: profissionais_saude ganha "tipo" e "area_cirurgica"; quartos ganha
+-- "tipo"; internacoes ganha "status"; a tabela consultas é substituída por
+-- "atendimentos" (as 4 modalidades numa tabela só).
+-- =========================================================
+
 -- Se você já tinha rodado a versão antiga deste script (tabela "users"),
 -- tire o "--" da linha abaixo para apagá-la antes. Isso apaga os pacientes
 -- que já estavam cadastrados nela.

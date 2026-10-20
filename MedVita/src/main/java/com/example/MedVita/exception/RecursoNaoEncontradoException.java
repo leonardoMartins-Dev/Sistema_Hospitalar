@@ -6,14 +6,18 @@ package com.example.MedVita.exception;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2), no PRIMEIRO dia: todo mundo usa.
  *
  * QUANDO É LANÇADA
  * Quando um service procura algo pelo id e não acha.
- * Ex.: "Quarto 305 não encontrado".
+ * Ex.: "Quarto 305 não encontrado", "Profissional 12 não encontrado".
  *
  * COMO VAI SER
- * extends RuntimeException, igual à SendEmailException que já existe.
+ *   public class RecursoNaoEncontradoException extends RuntimeException {
+ *       public RecursoNaoEncontradoException(String message) { super(message); }
+ *   }
+ *   (igual à SendEmailException que já existe)
  *
  * RESPOSTA
- * O GlobalExceptionHandler devolve HTTP 404 com a mensagem.
+ * O GlobalExceptionHandler devolve HTTP 404 com {"timestamp", "message"}.
  */

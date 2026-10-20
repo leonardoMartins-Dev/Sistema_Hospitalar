@@ -6,6 +6,9 @@ package com.example.MedVita.service;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * ADIADO: os testes ficam fora da Sprint 2 (decisão do grupo). Quando forem
+ * feitos, atualizar os casos para o modelo novo (Atendimento e os enums de
+ * situação no lugar de "AGENDADA"/"REALIZADA" em texto).
  *
  * COMO VAI SER
  * Teste com JUnit 5 e Mockito: os repositories viram objetos falsos (mocks),

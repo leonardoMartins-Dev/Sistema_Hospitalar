@@ -28,9 +28,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * Sem isso, um erro de banco apareceria para o usuário só como
  * "Ocorreu um erro inesperado" e não haveria como descobrir a causa.
  *
- * FUTURO: as exceções do sistema hospitalar ganham um método cada aqui:
- *   - RecursoNaoEncontradoException -> HTTP 404 com a mensagem
- *   - RegraNegocioException         -> HTTP 400 com a mensagem
+ * =========================================================
+ * A CRIAR (Sprint 2, responsável: Leonardo Gonzaga, no primeiro dia)
+ * =========================================================
+ * Um método @ExceptionHandler para cada caso, no mesmo formato dos de cima
+ * (Map com "timestamp" e "message"):
+ *   - RecursoNaoEncontradoException    -> HTTP 404 com a mensagem
+ *   - RegraNegocioException            -> HTTP 400 com a mensagem
+ *   - DataIntegrityViolationException  -> HTTP 409 com uma mensagem amigável
+ *       (ex.: dois agendamentos no mesmo horário passaram juntos e o índice
+ *       único do banco recusou o segundo; ou CPF/e-mail repetido)
+ *   - HttpMessageNotReadableException  -> HTTP 400, "Dados inválidos na requisição"
+ *       (ex.: JSON com "tipo": "XPTO", que não existe no enum)
+ * Nesses pode ser log.warn em vez de log.error: é erro do usuário, não do sistema.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {

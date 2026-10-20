@@ -33,9 +33,10 @@ import jakarta.persistence.Table;
  *   endereco        ->  endereco         (text)
  *   dataNascimento  ->  data_nascimento  (date)
  *
- * RELACIONAMENTOS (Regra de Negócio 1): um paciente pode ter várias
- * consultas e várias internações. Quem guarda a ligação são a Consulta e a
- * Internacao (coluna paciente_id), não esta classe.
+ * RELACIONAMENTOS (Regra de Negócio 1): um paciente pode ter vários
+ * atendimentos (consultas, emergências, cirurgias) e várias internações.
+ * Quem guarda a ligação são o Atendimento e a Internacao (coluna
+ * paciente_id), não esta classe.
  *
  * SENHA: NUNCA é guardada em texto puro. O PacienteService passa a senha
  * pelo BCrypt antes de criar o objeto, e aqui fica só o hash.
@@ -45,9 +46,10 @@ import jakarta.persistence.Table;
  * supabase/schema.sql. Se mudar algum campo aqui, mude também no banco.
  *
  * =========================================================
- * A CRIAR (ainda não implementado)
+ * A CRIAR (Sprint 2, responsável: João Pedro)
  * =========================================================
- * Os atributos do Requisito 1 já estão todos aqui. Falta só:
+ * A Sprint 2 não muda o paciente. Os atributos do Requisito 1 já estão todos
+ * aqui. Falta só:
  *   - @JsonIgnore em cima do atributo passwordHash. Quando o
  *     PacienteController devolver o paciente em JSON, a senha (mesmo em
  *     hash) não pode aparecer.

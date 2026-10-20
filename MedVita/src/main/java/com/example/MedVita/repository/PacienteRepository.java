@@ -29,7 +29,7 @@ import com.example.MedVita.models.Paciente;
  * @EnableJpaRepositories da classe TelaLoginApplication.
  *
  * =========================================================
- * A CRIAR (ainda não implementado)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  *   boolean existsByCpf(String cpf)
  *       -> o cadastro recusar CPF repetido com uma mensagem amigável

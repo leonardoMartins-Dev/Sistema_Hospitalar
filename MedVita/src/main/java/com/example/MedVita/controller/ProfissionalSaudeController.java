@@ -2,26 +2,39 @@ package com.example.MedVita.controller;
 
 /*
  * =========================================================
- * CONTROLLER DE PROFISSIONAIS DA SAÚDE  (/api/profissionais)
+ * CONTROLLER DE PROFISSIONAIS DA SAÚDE  (/profissionais)
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE É
- * @RestController: devolve dados em JSON (a API REST pedida no enunciado).
- * As páginas HTML continuam sendo abertas pelo SecureLoginController; elas
- * buscam e enviam os dados para os endereços abaixo.
+ * @RestController @RequestMapping("/profissionais"): devolve JSON.
+ *
+ * ATRIBUTOS: ProfissionalSaudeService, ConsultaService (só para /procedimentos)
  *
  * ROTAS
- *   GET    /api/profissionais                        -> lista (tela admin/medicos)
- *   GET    /api/profissionais?especialidade=...      -> filtro da tela de agendamento
- *   POST   /api/profissionais                        -> cadastrar médico
- *                                                       (formulário de admin/medicos)
- *   DELETE /api/profissionais/{id}                   -> remover médico
+ *   GET    /profissionais                              todos (tela admin/medicos)
+ *   GET    /profissionais?categoria=CLINICO_GERAL      filtro por categoria
+ *   GET    /profissionais?especialidade=CARDIOLOGIA    especialistas da área
+ *   GET    /profissionais?especialidade=CARDIOLOGIA&data=2026-11-10&horario=14:00
+ *                                                      só os LIVRES naquele horário
+ *                                                      (select da tela de agendamento)
+ *          Todos os filtros são @RequestParam(required = false) e vão para
+ *          profissionalSaudeService.buscar(categoria, especialidade, data, horario).
+ *   GET    /profissionais/especialidades               lista do enum (para os selects)
+ *   GET    /profissionais/{id}                         um profissional
+ *   GET    /profissionais/{id}/procedimentos           procedimentos do cirurgião
+ *                                                      -> consultaService.listarProcedimentosDoCirurgiao(id)
+ *   POST   /profissionais                              body: ProfissionalRequest -> 201   (ADMIN)
+ *   DELETE /profissionais/{id}                         -> 204                            (ADMIN)
  *
- * QUEM PODE: listar, qualquer usuário logado; cadastrar e remover, só ADMIN.
+ * QUEM PODE: listar, qualquer usuário logado; cadastrar e remover, só ADMIN
+ * (@PreAuthorize("hasRole('ADMIN')")).
+ *
+ * JSON DE SAÍDA
+ * Cada profissional sai com os campos da subclasse dele, mais "categoria" e
+ * "areaAtuacao". O passwordHash nunca sai (@JsonIgnore em ProfissionalSaude).
+ *
  * USA: ProfissionalSaudeService
- *
- * ATENÇÃO: o campo passwordHash precisa de @JsonIgnore, para a senha nunca
- * aparecer no JSON.
  */
