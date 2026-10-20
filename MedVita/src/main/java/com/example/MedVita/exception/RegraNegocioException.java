@@ -31,3 +31,9 @@ package com.example.MedVita.exception;
  * O GlobalExceptionHandler devolve HTTP 400 com a mensagem, e a página mostra
  * o erro para o usuário.
  */
+
+public class RegraNegocioException extends RuntimeException {
+    public RegraNegocioException(String message) {
+        super(message);
+    }
+}

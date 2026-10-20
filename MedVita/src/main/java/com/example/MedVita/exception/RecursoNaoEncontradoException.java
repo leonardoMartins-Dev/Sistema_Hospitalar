@@ -21,3 +21,9 @@ package com.example.MedVita.exception;
  * RESPOSTA
  * O GlobalExceptionHandler devolve HTTP 404 com {"timestamp", "message"}.
  */
+
+public class RecursoNaoEncontradoException extends RuntimeException {
+    public RecursoNaoEncontradoException(String message) {
+        super(message);
+    }
+}

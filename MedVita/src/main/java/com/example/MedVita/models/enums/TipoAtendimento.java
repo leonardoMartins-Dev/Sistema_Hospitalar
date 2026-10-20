@@ -31,3 +31,19 @@ package com.example.MedVita.models.enums;
  *   - ConsultaRequest.tipo (no POST /consultas: ROTINA ou ESPECIALIZADA)
  *   - filtro GET /consultas?tipo=EMERGENCIA
  */
+public enum TipoAtendimento {
+    ROTINA("Consulta de rotina"),
+    ESPECIALIZADA("Consulta especializada"),
+    EMERGENCIA("Atendimento de emergência"),
+    CIRURGIA("Procedimento cirúrgico");
+
+    private final String descricao;
+
+    TipoAtendimento(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+}

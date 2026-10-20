@@ -31,3 +31,22 @@ package com.example.MedVita.models.enums;
  * No banco fica o NOME do valor (@Enumerated(EnumType.STRING)), nunca o
  * número (ORDINAL): se alguém mudar a ordem do enum, os dados antigos não quebram.
  */
+
+public enum Especialidade {
+    CARDIOLOGIA("Cardiologia"),
+    DERMATOLOGIA("Dermatologia"),
+    GINECOLOGIA("Ginecologia"),
+    NEUROLOGIA("Neurologia"),
+    ORTOPEDIA("Ortopedia"),
+    PEDIATRIA("Pediatria");
+
+    private final String nome;
+
+    Especialidade(String nome){
+        this.nome = nome;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+}

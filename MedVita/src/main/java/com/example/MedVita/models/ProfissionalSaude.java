@@ -1,5 +1,91 @@
 package com.example.MedVita.models;
 
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.CategoriaProfissional;
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.TipoAtendimento;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
+
+@Entity //DECLARA COM ENTIDADE
+@Table(name="profissionais_saude")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)   // as 3 subclasses na mesma tabela)
+@DiscriminatorColumn(name = "tipo") 
+public abstract class ProfissionalSaude{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column (nullable = false)
+    private String nome;
+
+    @Column(name="registro_profissional", nullable = false, unique = true)
+    private String registroProfissional;
+
+    @Column(nullable = false)
+    private String telefone;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @JsonIgnore   // a senha (mesmo em hash) nunca sai no JSON
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
+    //JPA precisa de um construtor vazio
+    protected ProfissionalSaude(){
+    }
+
+    protected ProfissionalSaude(String nome, String registroProfissional, String telefone,
+            String email, String passwordHash) {
+        this.nome = nome;
+        this.registroProfissional = registroProfissional;
+        this.telefone = telefone;
+        this.email = email;
+        this.passwordHash = passwordHash;
+    }
+
+    // ===== POLIMORFISMO: cada categoria responde do seu jeito =====
+
+    public abstract CategoriaProfissional getCategoria();
+
+    public abstract String getAreaAtuacao();
+
+    public abstract boolean podeRealizar(TipoAtendimento tipo, Especialidade especialidade);
+
+    public abstract boolean podeEncaminhar();
+
+    // Escrito uma vez só, vale para as 3 subclasses. Não tem nenhum "if que tipo
+    // de médico é": quem decide é o podeRealizar() de cada subclasse..
+    public void verificarSePodeRealizar(TipoAtendimento tipo, Especialidade especialidade) {
+        if (!podeRealizar(tipo, especialidade)) {
+            throw new RegraNegocioException(nome + " (" + getAreaAtuacao()
+                    + ") não pode realizar " + tipo.getDescricao());
+        }
+    }
+
+    // ===== GETTERS E SETTERS =====
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public String getRegistroProfissional() { return registroProfissional; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+}
+
 /*
  * =========================================================
  * PROFISSIONAL DA SAÚDE  (classe ABSTRATA, topo da herança)
