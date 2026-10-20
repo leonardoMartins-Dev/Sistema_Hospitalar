@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: PRIORIDADE DA EMERGÊNCIA
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2)
  *
  * As categorias "previamente definidas pelo sistema" do enunciado.
@@ -27,3 +27,21 @@ package com.example.MedVita.models.enums;
  * Não ordenem pelo banco (ORDER BY prioridade): com EnumType.STRING ele
  * ordena pelo texto, em ordem alfabética.
  */
+public enum Prioridade {
+
+    // A ORDEM IMPORTA: da menor para a maior (usada para ordenar a fila)
+    BAIXA("Baixa"),
+    MODERADA("Moderada"),
+    ALTA("Alta"),
+    CRITICA("Crítica");
+
+    private final String descricao;
+
+    Prioridade(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+}

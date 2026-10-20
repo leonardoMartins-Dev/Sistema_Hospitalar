@@ -1,11 +1,26 @@
 package com.example.MedVita.models;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.StatusProcedimento;
+import com.example.MedVita.models.enums.TipoAtendimento;
+import com.example.MedVita.models.enums.TipoCirurgia;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 /*
  * =========================================================
  * PROCEDIMENTO CIRÚRGICO  (subclasse de Atendimento)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2)
  *
  * O QUE É (enunciado da Sprint 2)
@@ -16,54 +31,139 @@ package com.example.MedVita.models;
  *   - Situações: agendado, em andamento, concluído ou cancelado.
  *   - Não pode ser registrado como concluído se não tiver sido iniciado.
  *
- * COMO VAI SER
- *   @Entity
- *   @DiscriminatorValue("CIRURGIA")
- *   public class ProcedimentoCirurgico extends Atendimento
- *
  * ATRIBUTOS PRÓPRIOS
- *   String descricaoProcedimento       coluna descricao_procedimento, obrigatório
- *   TipoCirurgia tipoCirurgia          @Enumerated(STRING), coluna tipo_cirurgia, obrigatório
- *   String observacoesPreOperatorias   coluna obs_pre_operatorias
- *   String observacoesPosOperatorias   coluna obs_pos_operatorias (preenchida ao concluir)
- *   LocalDateTime inicioEfetivo        coluna inicio_efetivo (preenchido ao iniciar)
- *   LocalDateTime fimEfetivo           coluna fim_efetivo (preenchido ao concluir)
- *   StatusProcedimento status          @Enumerated(STRING) @Column(name = "status")
- *                                      começa em AGENDADO
+ *   descricaoProcedimento       coluna descricao_procedimento, obrigatório
+ *   tipoCirurgia                coluna tipo_cirurgia, obrigatório
+ *   observacoesPreOperatorias   coluna obs_pre_operatorias
+ *   observacoesPosOperatorias   coluna obs_pos_operatorias (preenchida ao concluir)
+ *   inicioEfetivo               coluna inicio_efetivo (preenchido ao iniciar)
+ *   fimEfetivo                  coluna fim_efetivo (preenchido ao concluir)
+ *   status                      coluna status, começa em AGENDADO
  *   data/horario herdados de Atendimento = os PREVISTOS.
- *   inicioEfetivo/fimEfetivo = os efetivos ("quando aplicável").
  *
- * CONSTRUTORES
- *   protected ProcedimentoCirurgico()   (JPA)
- *   public ProcedimentoCirurgico(paciente, cirurgiao, dataPrevista, horarioPrevisto,
- *                                descricaoProcedimento, tipoCirurgia, observacoesPreOperatorias)
- *
- * MÉTODOS
- *   getTipo() -> TipoAtendimento.CIRURGIA
- *
- *   validarRegrasDaModalidade()
- *       - descrição e tipo de cirurgia obrigatórios
- *       - verificarDataFutura() (data/hora prevista)
- *       - verificarProfissional(): só o Cirurgiao aceita
- *
- *   iniciar(), concluir() e cancelar() são chamados pelas rotas genéricas do
- *   ConsultaController (PUT /consultas/{id}/iniciar etc.), que só conhecem a
- *   classe Atendimento. Nada aqui precisa da parte do João Pedro além da
- *   classe Atendimento.
- *
- *   iniciar()               AGENDADO -> EM_ANDAMENTO; inicioEfetivo = LocalDateTime.now()
- *   concluir(String obsPos) EM_ANDAMENTO -> CONCLUIDO; fimEfetivo = now;
- *                           observacoesPosOperatorias = obsPos
- *                           Se ainda estiver AGENDADO: RegraNegocioException(
- *                           "Não é possível concluir um procedimento que não foi
- *                           iniciado")  <- regra do enunciado
- *   cancelar()              AGENDADO -> CANCELADO. Em andamento não cancela.
- *   ocupaAgenda()           -> status != CANCELADO
- *   isConcluido()           -> status == CONCLUIDO
- *
- *   As mudanças passam por um mudarStatus privado com StatusProcedimento.podeMudarPara.
+ * iniciar(), concluir() e cancelar() são chamados pelas rotas genéricas do
+ * ConsultaController (PUT /consultas/{id}/iniciar etc.), que só conhecem a
+ * classe Atendimento (polimorfismo).
  *
  * ROTAS (EmergenciaCirurgiaController, também desta parte)
  *   POST /consultas/cirurgias                   agendar (body: CirurgiaRequest)
  *   GET  /consultas/procedimentos?cirurgiaoId=9 procedimentos de um cirurgião
  */
+@Entity
+@DiscriminatorValue("CIRURGIA")
+public class ProcedimentoCirurgico extends Atendimento {
+
+    @Column(name = "descricao_procedimento")
+    private String descricaoProcedimento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_cirurgia")
+    private TipoCirurgia tipoCirurgia;
+
+    @Column(name = "obs_pre_operatorias")
+    private String observacoesPreOperatorias;
+
+    @Column(name = "obs_pos_operatorias")
+    private String observacoesPosOperatorias;
+
+    @Column(name = "inicio_efetivo")
+    private LocalDateTime inicioEfetivo;
+
+    @Column(name = "fim_efetivo")
+    private LocalDateTime fimEfetivo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusProcedimento status;
+
+    //CONSTRUTORES
+
+    protected ProcedimentoCirurgico() {
+        // obrigatório para o JPA
+    }
+
+    public ProcedimentoCirurgico(Paciente paciente, ProfissionalSaude cirurgiao,
+            LocalDate dataPrevista, LocalTime horarioPrevisto,
+            String descricaoProcedimento, TipoCirurgia tipoCirurgia,
+            String observacoesPreOperatorias) {
+        // a descrição do procedimento também vai como "motivo" do atendimento
+        super(paciente, cirurgiao, dataPrevista, horarioPrevisto, descricaoProcedimento);
+        this.descricaoProcedimento = descricaoProcedimento;
+        this.tipoCirurgia = tipoCirurgia;
+        this.observacoesPreOperatorias = observacoesPreOperatorias;
+        this.status = StatusProcedimento.AGENDADO;
+    }
+
+    //TIPO DO ATENDIMENTO (sai no JSON como "tipo")
+    @Override
+    public TipoAtendimento getTipo() {
+        return TipoAtendimento.CIRURGIA;
+    }
+
+    //REGRAS PRÓPRIAS DA CIRURGIA (chamado pelo validar() da classe mãe)
+    @Override
+    protected void validarRegrasDaModalidade() {
+        if (descricaoProcedimento == null || descricaoProcedimento.isBlank()) {
+            throw new RegraNegocioException("Informe a descrição do procedimento");
+        }
+        if (tipoCirurgia == null) {
+            throw new RegraNegocioException("Informe o tipo de cirurgia");
+        }
+        verificarDataFutura();
+        verificarProfissional(); // só o Cirurgiao aceita
+    }
+
+    //SITUAÇÕES
+
+    @Override
+    public void iniciar() {
+        mudarStatus(StatusProcedimento.EM_ANDAMENTO);
+        inicioEfetivo = LocalDateTime.now();
+    }
+
+    @Override
+    public void concluir(String observacoesPos) {
+        // regra do enunciado: não conclui o que não foi iniciado
+        if (status == StatusProcedimento.AGENDADO) {
+            throw new RegraNegocioException(
+                    "Não é possível concluir um procedimento que não foi iniciado");
+        }
+        mudarStatus(StatusProcedimento.CONCLUIDO);
+        fimEfetivo = LocalDateTime.now();
+        observacoesPosOperatorias = observacoesPos;
+    }
+
+    @Override
+    public void cancelar() {
+        mudarStatus(StatusProcedimento.CANCELADO); // só AGENDADO pode cancelar
+    }
+
+    @Override
+    public boolean ocupaAgenda() {
+        return status != StatusProcedimento.CANCELADO;
+    }
+
+    @Override
+    public boolean isConcluido() {
+        return status == StatusProcedimento.CONCLUIDO;
+    }
+
+    //QUEM SABE QUAIS MUDANÇAS VALEM É O ENUM
+    private void mudarStatus(StatusProcedimento novo) {
+        if (!status.podeMudarPara(novo)) {
+            throw new RegraNegocioException("Um procedimento " + status.getDescricao()
+                    + " não pode passar para " + novo.getDescricao());
+        }
+        status = novo;
+    }
+
+    //GETTERS
+
+    public String getDescricaoProcedimento() { return descricaoProcedimento; }
+    public TipoCirurgia getTipoCirurgia() { return tipoCirurgia; }
+    public String getObservacoesPreOperatorias() { return observacoesPreOperatorias; }
+    public String getObservacoesPosOperatorias() { return observacoesPosOperatorias; }
+    public LocalDateTime getInicioEfetivo() { return inicioEfetivo; }
+    public LocalDateTime getFimEfetivo() { return fimEfetivo; }
+    public StatusProcedimento getStatus() { return status; }
+}
