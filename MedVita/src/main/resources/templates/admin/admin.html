@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Administração</title>
 
@@ -77,8 +79,8 @@
             <div class="stat-card">
               <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M8 3H5.5"/><path d="M15.5 3H13"/><path d="M18 9v2.5a6 6 0 0 1-12 0V9"/><circle cx="19.5" cy="8" r="1.6"/></svg></div>
               <span class="stat-label">Médicos cadastrados</span>
-              <div class="stat-value">3</div>
-              <p class="stat-hint">Profissionais ativos no MEDVITA.</p>
+              <div class="stat-value" id="total-medicos">--</div>
+              <p class="stat-hint" id="medicos-por-categoria">Profissionais ativos no MEDVITA.</p>
             </div>
 
             <div class="stat-card">
@@ -121,5 +123,18 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      // total de médicos e quantos de cada categoria
+      api.get('/profissionais')
+        .then((medicos) => {
+          const contar = (categoria) => medicos.filter((m) => m.categoria === categoria).length;
+          document.getElementById('total-medicos').textContent = medicos.length;
+          document.getElementById('medicos-por-categoria').textContent =
+            `${contar('CLINICO_GERAL')} clínicos gerais · ${contar('ESPECIALISTA')} especialistas · ${contar('CIRURGIAO')} cirurgiões`;
+        })
+        .catch(() => {});   // se falhar, o card continua com "--"
+    </script>
   </body>
 </html>

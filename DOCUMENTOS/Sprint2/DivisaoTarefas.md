@@ -152,14 +152,14 @@ Todas são dependências **de "a classe existir na main"**, não de "estar pront
 > Enquanto o contrato não chega, dá para escrever o código normalmente: a assinatura de cada método já está no comentário da classe. Só não compila até o merge.
 
 Fora do código Java:
-- **Banco:** todo mundo precisa do Supabase no ar para **testar** (não para escrever código). Isso é do Leonardo Gonzaga, na fase 1.
-- **Telas:** as telas do Gonzaga usam as rotas genéricas `/consultas/{id}/iniciar|concluir|cancelar` do João. Como as telas são da fase 3, essas rotas já vão existir. Todas as telas usam o `api.js` do Gonzaga (fase 1).
+- **Banco:** todo mundo precisa do Supabase no ar para **testar** (não para escrever código). Isso é do Leonardo Martins, na fase 1.
+- **Telas:** as telas do Gonzaga usam as rotas genéricas `/consultas/{id}/iniciar|concluir|cancelar` do João. Como as telas são da fase 3, essas rotas já vão existir. Todas as telas usam o `api.js` do Leonardo Martins (fase 1).
 
 ---
 
 ## 6. Banco de dados (o que muda no `schema.sql`)
 
-Responsável: **Leonardo Gonzaga**. Como o banco ainda não tem dados de verdade, dá para apagar e criar as tabelas de novo. Continua `spring.jpa.hibernate.ddl-auto=none`, então **o nome de cada coluna tem que bater exatamente** com o `@Column` das classes.
+Responsável: **Leonardo Martins** (passou do Leonardo Gonzaga). Como o banco ainda não tem dados de verdade, o `schema.sql` **apaga todas as tabelas e cria de novo**: rodar o script zera o banco. Continua `spring.jpa.hibernate.ddl-auto=none`, então **o nome de cada coluna tem que bater exatamente** com o `@Column` das classes.
 
 ### `profissionais_saude`
 | Coluna | Mudança | Regra |
@@ -205,7 +205,7 @@ O índice "um paciente internado por vez" passa a ser único em `paciente_id` **
 
 As FKs de `atendimentos` e `internacoes` para `profissionais_saude` **não** podem ter `on delete cascade`: são elas que impedem remover um médico com histórico.
 
-> **Obs. técnica:** as três subclasses de `Atendimento` que têm situação mapeiam a mesma coluna `status`, cada uma com o próprio enum. O Hibernate aceita isso em `SINGLE_TABLE`. Se reclamar de coluna repetida, a saída é usar colunas separadas (`status_consulta`, `status_emergencia`, `status_procedimento`) e avisar o Gonzaga para mudar o schema.
+> **Obs. técnica:** as três subclasses de `Atendimento` que têm situação mapeiam a mesma coluna `status`, cada uma com o próprio enum. O Hibernate aceita isso em `SINGLE_TABLE`. Se reclamar de coluna repetida, a saída é usar colunas separadas (`status_consulta`, `status_emergencia`, `status_procedimento`) e avisar o Leonardo Martins para mudar o schema.
 
 ---
 
@@ -213,10 +213,14 @@ As FKs de `atendimentos` e `internacoes` para `profissionais_saude` **não** pod
 
 Troquem as partes entre vocês se quiserem; basta atualizar a linha `RESPONSÁVEL:` dos arquivos.
 
-### Leonardo Martins: Pessoas e acesso (profissionais, pacientes, login, exceções)
+### Leonardo Martins: Pessoas e acesso (profissionais, pacientes, login, exceções) e infraestrutura
 Não depende de ninguém. Os outros dependem dos seus contratos, então eles saem primeiro.
 
 Passo a passo detalhado: [PassoAPasso-LeonardoMartins.md](PassoAPasso-LeonardoMartins.md).
+
+**Infraestrutura (fase 1, passou do Leonardo Gonzaga)**
+- [ ] `supabase/schema.sql` novo (seção 6), **rodado no Supabase**, e o banco funcionando para o grupo. Mandem o `.env` por mensagem privada, **nunca no git**.
+- [ ] `static/js/api.js` (seção 9)
 
 **Back (contratos, fase 1)**
 - [ ] `models/ProfissionalSaude.java` (abstrata, `podeRealizar`, `podeEncaminhar`, `verificarSePodeRealizar`)
@@ -257,12 +261,8 @@ Depende só dos contratos do Leonardo Martins.
 
 **No fim:** atualizar o `README.md` (estrutura, Sprint 2, tirar o "MASI MUDANCAS EM BREVE").
 
-### Leonardo Gonzaga: Emergência, cirurgia e infraestrutura
-Depende da classe `Atendimento` (João Pedro) e dos contratos do Leonardo Martins. Não mexe em nenhum arquivo deles.
-
-**Infraestrutura (fase 1)**
-- [ ] `supabase/schema.sql` novo (seção 6), **rodado no Supabase**, e o banco funcionando para o grupo. Mandem o `.env` por mensagem privada, **nunca no git**.
-- [ ] `static/js/api.js` (seção 9)
+### Leonardo Gonzaga: Emergência e cirurgia
+Depende da classe `Atendimento` (João Pedro) e dos contratos do Leonardo Martins. Não mexe em nenhum arquivo deles. O banco (`schema.sql`) e o `api.js` passaram para o Leonardo Martins: se precisar de alguma coluna, peça a ele.
 
 **Back**
 - [ ] `models/AtendimentoEmergencia.java`, `models/ProcedimentoCirurgico.java`
@@ -300,7 +300,7 @@ Depende só dos contratos do Leonardo Martins. O histórico, feito por último, 
 
 | Fase | O quê | Pronto quando |
 |---|---|---|
-| **1. Contratos e base** (primeiros 2 dias) | Contratos do Leonardo Martins e do João Pedro (seção 5); schema, banco no ar e `api.js` (Gonzaga). Henrique já começa Quarto e Internação. | `main` compila com os contratos e o Supabase responde |
+| **1. Contratos e base** (primeiros 2 dias) | Contratos do Leonardo Martins e do João Pedro (seção 5); schema, banco no ar e `api.js` (Leonardo Martins). Henrique já começa Quarto e Internação. | `main` compila com os contratos e o Supabase responde |
 | **2. Regras e API** | Cada um termina models, repositories, services e controllers da sua parte | as rotas da seção 4 respondem |
 | **3. Telas** | Cada um liga as suas telas | dá para fazer o roteiro abaixo só clicando |
 | **4. Fechamento** | Roteiro de teste completo, conferir o diagrama com o código, README, ensaio da apresentação | |
@@ -330,7 +330,7 @@ As telas hoje são HTML estático, sem JavaScript. Para ligar cada uma na API:
    <meta name="_csrf" th:content="${_csrf.token}"/>
    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
    ```
-2. **`static/js/api.js`** (Gonzaga faz no começo). Funções `api.get(url)`, `api.post(url, corpo)`, `api.put(url, corpo)` e `api.delete(url)`, que:
+2. **`static/js/api.js`** (Leonardo Martins faz no começo). Funções `api.get(url)`, `api.post(url, corpo)`, `api.put(url, corpo)` e `api.delete(url)`, que:
    - mandam `Content-Type: application/json` e o cabeçalho do CSRF (lido das duas `<meta>`);
    - se a resposta não for ok, leem o `{"message"}` do `GlobalExceptionHandler` e lançam um `Error` com essa mensagem;
    - devolvem o JSON (ou `null` no 204).
@@ -344,7 +344,7 @@ As telas hoje são HTML estático, sem JavaScript. Para ligar cada uma na API:
 - **Os contratos da fase 1 vão em PRs pequenos e rápidos.** O resto pode ir em PRs maiores.
 - **Nenhum arquivo Java tem dois donos.** Os únicos arquivos mexidos por mais de uma pessoa:
   - `SecurityConfig`: só o Leonardo Martins mexe; quem precisar de algo pede a ele.
-  - `schema.sql`: só o Gonzaga mexe; quem precisar de coluna pede a ele.
+  - `schema.sql`: só o Leonardo Martins mexe; quem precisar de coluna pede a ele.
   - `SecureLoginController` e o menu lateral das páginas do médico: o Gonzaga mexe só no fim (fase 4).
 - `.env` nunca vai para o git.
 

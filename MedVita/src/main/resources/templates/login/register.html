@@ -83,13 +83,18 @@
           </div>
         </form>
 
-        <!-- Usuário já cadastrado -->
-        <div
-          class="register-message error-message"
-          th:if="${param.erro != null}"
-        >
+                <!-- E-mail já cadastrado -->
+        <div class="register-message error-message"
+             th:if="${param.erro != null and param.erro[0] == 'email'}">
           <strong>Usuário já cadastrado!</strong>
           <span> Este e-mail já possui uma conta. </span>
+        </div>
+
+        <!-- CPF já cadastrado -->
+        <div class="register-message error-message"
+             th:if="${param.erro != null and param.erro[0] == 'cpf'}">
+          <strong>CPF já cadastrado!</strong>
+          <span> Já existe uma conta com este CPF. </span>
         </div>
 
         <!-- Cadastro realizado -->

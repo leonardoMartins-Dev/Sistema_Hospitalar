@@ -17,27 +17,27 @@ Este guia está **na ordem em que você deve fazer**. Cada passo diz o arquivo, 
 - [x] Passo 3: `ProfissionalSaude`
 - [x] Passo 4: as 3 subclasses
 - [x] Passo 5: `ProfissionalSaudeRepository`
-- [ ] Passo 6: conferir, PR e avisar o grupo
+- [x] Passo 6: conferir, PR e avisar o grupo
 
 **Fase 2: regras e API**
-- [ ] Passo 7: `GlobalExceptionHandler`
-- [ ] Passo 8: `SecurityConfig`
-- [ ] Passo 9: `ProfissionalRequest`
-- [ ] Passo 10: `ProfissionalSaudeService`
-- [ ] Passo 11: `ProfissionalSaudeController`
-- [ ] Passo 12: login do médico (`DatabaseUserDetailsService`)
-- [ ] Passo 13: pacientes (model, repository, service, cadastro, controller)
-- [ ] Passo 14: testar as rotas GET no navegador
+- [x] Passo 7: `GlobalExceptionHandler`
+- [x] Passo 8: `SecurityConfig`
+- [x] Passo 9: `ProfissionalRequest`
+- [x] Passo 10: `ProfissionalSaudeService`
+- [x] Passo 11: `ProfissionalSaudeController`
+- [x] Passo 12: login do médico (`DatabaseUserDetailsService`)
+- [x] Passo 13: pacientes (model, repository, service, cadastro, controller)
+- [x] Passo 14: testar as rotas GET no navegador
 
 **Fase 3: telas**
-- [ ] Passo 15: preparar as páginas (CSRF + `api.js`)
-- [ ] Passo 16: `admin/medicos`
-- [ ] Passo 17: `medico/pacientes`
-- [ ] Passo 18: `paciente/perfil`
-- [ ] Passo 19 (opcional): números do painel `admin/admin`
+- [x] Passo 15: preparar as páginas (CSRF + `api.js`)
+- [x] Passo 16: `admin/medicos`
+- [x] Passo 17: `medico/pacientes`
+- [x] Passo 18: `paciente/perfil`
+- [x] Passo 19 (opcional): números do painel `admin/admin`
 
 **Fase 4: fechamento**
-- [ ] Passo 20: roteiro de teste da sua parte
+- [x] Passo 20: roteiro de teste da sua parte
 - [ ] Passo 21: PR final
 
 ---

@@ -1,5 +1,50 @@
 package com.example.MedVita.controller;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.MedVita.exception.RecursoNaoEncontradoException;
+import com.example.MedVita.models.Paciente;
+import com.example.MedVita.service.PacienteService;
+
+@RestController
+@RequestMapping("/pacientes")
+public class PacienteController {
+
+    private final PacienteService pacienteService;
+
+    public PacienteController(PacienteService pacienteService) {
+        this.pacienteService = pacienteService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    public List<Paciente> listar(@RequestParam(name = "busca", required = false) String busca) {
+        return pacienteService.buscar(busca);
+    }
+
+    // "/perfil" é um caminho fixo, então o Spring escolhe esta rota antes da "/{id}"
+    @GetMapping("/perfil")
+    @PreAuthorize("hasRole('USER')")
+    public Paciente perfil(Authentication authentication) {
+        return pacienteService.buscarPorEmail(authentication.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    public Paciente buscarPorId(@PathVariable Long id) {
+        return pacienteService.buscarPorId(id);
+    }
+}
+
 /*
  * =========================================================
  * CONTROLLER DE PACIENTES  (/pacientes)
