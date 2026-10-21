@@ -205,6 +205,10 @@ public class SecureLoginController {
                         return "redirect:/register?erro=email";
                 }
 
+                if (pacienteService.existeCpf(cpf)) {
+                        return "redirect:/register?erro=cpf";
+                }
+
                 pacienteService.cadastrar(
                                 email,
                                 senha,

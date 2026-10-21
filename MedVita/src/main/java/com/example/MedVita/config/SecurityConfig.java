@@ -3,6 +3,7 @@ package com.example.MedVita.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.MedVita.service.RecaptchaService;
+
 
 //SEMPRE ADICIONAR UM LINHA NOVA NO SECURITY CONFIG PARA CADA PAGINA CRIADA
 
@@ -44,7 +46,7 @@ import com.example.MedVita.service.RecaptchaService;
  * usuários aqui.
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  * 1) @EnableMethodSecurity na classe, para os controllers poderem usar
  *    @PreAuthorize("hasRole('MEDICO')") etc. em cada rota da API.
@@ -64,6 +66,7 @@ import com.example.MedVita.service.RecaptchaService;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity      // liga o @PreAuthorize nos controllers
 public class SecurityConfig {
 
     private final RecaptchaFilter recaptchaFilter;
@@ -87,6 +90,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/resetpassword").permitAll()
                 .requestMatchers(HttpMethod.POST, "/resetpassword").permitAll()
                 .requestMatchers(HttpMethod.GET, "/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/js/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/medico/**").hasRole("MEDICO")
                 .anyRequest().authenticated()

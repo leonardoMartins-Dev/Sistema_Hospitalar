@@ -1,5 +1,18 @@
 package com.example.MedVita.dto;
 
+import com.example.MedVita.models.enums.CategoriaProfissional;
+import com.example.MedVita.models.enums.Especialidade;
+
+public record ProfissionalRequest(
+        CategoriaProfissional tipo,
+        String nome,
+        String registroProfissional,
+        String telefone,
+        String email,
+        String senha,
+        Especialidade especialidade,   // só ESPECIALISTA
+        String areaCirurgica) {        // só CIRURGIAO
+}
 /*
  * =========================================================
  * DTO: CADASTRO DE PROFISSIONAL  (corpo do POST /profissionais)

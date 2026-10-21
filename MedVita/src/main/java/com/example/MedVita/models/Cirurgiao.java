@@ -1,5 +1,54 @@
 package com.example.MedVita.models;
+import com.example.MedVita.models.enums.CategoriaProfissional;
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.TipoAtendimento;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+@Entity
+@DiscriminatorValue("CIRURGIAO")
+public class Cirurgiao extends ProfissionalSaude {
+    @Column(name = "area_cirurgica")
+    private String areaCirurgica;
+
+    protected Cirurgiao(){
+    }
+    public Cirurgiao(String nome, String registroProfissional, String telefone,
+            String email, String passwordHash, String areaCirurgica) {
+        super(nome, registroProfissional, telefone, email, passwordHash);
+        this.areaCirurgica = areaCirurgica;
+    }
+
+    @Override
+    public CategoriaProfissional getCategoria() {
+        return CategoriaProfissional.CIRURGIAO;
+    }
+
+    @Override
+    public String getAreaAtuacao() {
+        return areaCirurgica;
+    }
+    
+     // Só procedimentos cirúrgicos (decisão do grupo)
+    @Override
+    public boolean podeRealizar(TipoAtendimento tipo, Especialidade especialidade) {
+        return tipo == TipoAtendimento.CIRURGIA;
+    }
+
+    @Override
+    public boolean podeEncaminhar() {
+        return false;
+    }
+
+    public String getAreaCirurgica() {
+        return areaCirurgica;
+    }
+
+}
 /*
  * =========================================================
  * CIRURGIÃO  (subclasse de ProfissionalSaude)

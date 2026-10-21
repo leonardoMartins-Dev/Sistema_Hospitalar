@@ -1,11 +1,15 @@
 package com.example.MedVita.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
+import com.example.MedVita.exception.RecursoNaoEncontradoException;
+import com.example.MedVita.exception.RegraNegocioException;
 import com.example.MedVita.models.Paciente;
 import com.example.MedVita.repository.PacienteRepository;
 
@@ -36,10 +40,10 @@ import com.example.MedVita.repository.PacienteRepository;
  *   atualizarSenha() -> grava a nova senha no fluxo "esqueci minha senha"
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
- * Façam o buscarPorId() PRIMEIRO: ConsultaService, InternacaoService e
- * HistoricoMedicoService dependem dele.
+ * Ninguém depende destes métodos novos: os outros services usam
+ * PacienteRepository.findById e o buscarPorEmail que já existe.
  *   - No cadastrar(): recusar CPF repetido com
  *     pacienteRepository.existsByCpf(...) e lançar RegraNegocioException.
  *     Hoje só o e-mail é conferido; o banco já recusa CPF repetido
@@ -51,8 +55,7 @@ import com.example.MedVita.repository.PacienteRepository;
  *          devolve todos
  *   - Paciente buscarPorId(Long id)
  *       -> lança RecursoNaoEncontradoException se não existir (botão
- *          "Ver ficha" da tela medico/pacientes, ConsultaService,
- *          InternacaoService e HistoricoMedicoService)
+ *          "Ver ficha" da tela medico/pacientes)
  */
 @Service
 public class PacienteService {
@@ -68,12 +71,45 @@ public class PacienteService {
         //CRIA O PACIENTE COM OS DADOS DO CADASTRO E SALVA NO DB
         public void cadastrar(String email, String senha, String nome,
                         String cpf, String telefone, String endereco, LocalDate dataNascimento){
+                if (existeCpf(cpf)) {
+                        throw new RegraNegocioException("Já existe um paciente com este CPF");
+                }
                 Paciente paciente = new Paciente(normalizar(email), passwordEncoder.encode(senha), nome);
                 paciente.setCpf(somenteDigitos(cpf));
                 paciente.setTelefone(telefone);
                 paciente.setEndereco(endereco);
                 paciente.setDataNascimento(dataNascimento);
                 pacienteRepository.save(paciente);
+        }
+
+        //VERIFICA SE O CPF JÁ ESTÁ CADASTRADO
+        public boolean existeCpf(String cpf){
+                return pacienteRepository.existsByCpf(somenteDigitos(cpf));
+        }
+
+        //TODOS OS PACIENTES, EM ORDEM DE NOME
+        public List<Paciente> listar(){
+                return pacienteRepository.findAll(Sort.by("nome"));
+        }
+
+        //BUSCA POR NOME, CPF OU E-MAIL (TEXTO VAZIO = TODOS)
+        public List<Paciente> buscar(String termo){
+                if (termo == null || termo.isBlank()) {
+                        return listar();
+                }
+                String texto = termo.trim();
+                String digitos = somenteDigitos(texto);
+                // se o texto não tem número (ex.: "Ana"), o "" casaria com todo CPF
+                String cpf = digitos.isEmpty() ? texto : digitos;
+                return pacienteRepository
+                        .findByNomeContainingIgnoreCaseOrCpfContainingOrEmailContainingIgnoreCase(texto, cpf, texto);
+        }
+
+        //BUSCA PELO ID (404 SE NÃO EXISTIR)
+        public Paciente buscarPorId(Long id){
+                return pacienteRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                                                "Paciente " + id + " não encontrado"));
         }
 
         //VERIFICA O PACIENTE PELO EMAIL
@@ -114,4 +150,6 @@ public class PacienteService {
         private String somenteDigitos(String valor){
                 return valor == null ? null : valor.replaceAll("\\D", "");
         }
+
+
 }

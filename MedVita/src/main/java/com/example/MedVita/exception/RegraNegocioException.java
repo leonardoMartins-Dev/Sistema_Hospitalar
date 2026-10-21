@@ -6,7 +6,7 @@ package com.example.MedVita.exception;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2), no PRIMEIRO dia: todo mundo usa.
+ * RESPONSÁVEL: Leonardo Martins (Sprint 2), nos PRIMEIROS DIAS: todo mundo usa.
  *
  * QUANDO É LANÇADA
  * Quando um pedido fere uma regra do hospital. É uma exceção só para todas
@@ -31,3 +31,9 @@ package com.example.MedVita.exception;
  * O GlobalExceptionHandler devolve HTTP 400 com a mensagem, e a página mostra
  * o erro para o usuário.
  */
+
+public class RegraNegocioException extends RuntimeException {
+    public RegraNegocioException(String message) {
+        super(message);
+    }
+}

@@ -1,5 +1,28 @@
 package com.example.MedVita.repository;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.example.MedVita.models.MedicoEspecialista;
+import com.example.MedVita.models.ProfissionalSaude;
+import com.example.MedVita.models.enums.Especialidade;
+
+public interface ProfissionalSaudeRepository extends JpaRepository<ProfissionalSaude, Long> {
+    Optional<ProfissionalSaude> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByRegistroProfissional(String registroProfissional);
+
+    // "especialidade" só existe na subclasse, por isso precisa de @Query
+    @Query("select m from MedicoEspecialista m where m.especialidade = :especialidade order by m.nome")
+    List<MedicoEspecialista> buscarEspecialistas(@Param("especialidade") Especialidade especialidade);
+}
+
 /*
  * =========================================================
  * REPOSITÓRIO DE PROFISSIONAIS DA SAÚDE

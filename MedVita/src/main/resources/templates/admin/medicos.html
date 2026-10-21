@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Médicos</title>
 
@@ -82,16 +84,25 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="especialidade">Especialidade</label>
-                  <select id="especialidade" name="especialidade" required>
-                    <option value="" selected disabled>Selecione a especialidade</option>
-                    <option>Clínica Geral</option>
-                    <option>Cardiologia</option>
-                    <option>Ortopedia</option>
-                    <option>Pediatria</option>
-                    <option>Dermatologia</option>
-                    <option>Ginecologia</option>
+                  <label for="categoria">Categoria</label>
+                  <select id="categoria" required>
+                    <option value="" selected disabled>Selecione a categoria</option>
+                    <option value="CLINICO_GERAL">Médico clínico geral</option>
+                    <option value="ESPECIALISTA">Médico especialista</option>
+                    <option value="CIRURGIAO">Cirurgião</option>
                   </select>
+                </div>
+
+                <div class="form-group" id="grupo-especialidade" style="display: none">
+                  <label for="especialidade">Especialidade</label>
+                  <select id="especialidade">
+                    <option value="" selected disabled>Selecione a especialidade</option>
+                  </select>
+                </div>
+
+                <div class="form-group" id="grupo-area" style="display: none">
+                  <label for="areaCirurgica">Área cirúrgica</label>
+                  <input type="text" id="areaCirurgica" placeholder="Ex.: Cirurgia cardíaca" />
                 </div>
 
                 <div class="form-group">
@@ -103,15 +114,21 @@
                   <label for="email">E-mail</label>
                   <input type="email" id="email" name="email" placeholder="E-mail para contato" required />
                 </div>
+
+                <div class="form-group">
+                  <label for="senha">Senha inicial</label>
+                  <input type="password" id="senha" placeholder="Senha do primeiro acesso" required />
+                </div>
               </div>
 
               <div class="form-actions">
-                <button type="button" class="btn">
+                <button type="button" class="btn" id="btn-adicionar">
                   <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
                   Adicionar médico
                 </button>
               </div>
             </form>
+            <p id="mensagem" style="display: none; margin-top: 1rem"></p>
           </div>
 
           <div class="card">
@@ -128,61 +145,127 @@
                   <tr>
                     <th>Nome</th>
                     <th>Registro</th>
-                    <th>Especialidade</th>
+                    <th>Categoria</th>
+                    <th>Área de atuação</th>
                     <th>Telefone</th>
                     <th>E-mail</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  <tr>
-                    <td>Dr. Ricardo Almeida</td>
-                    <td>CRM 111222-MG</td>
-                    <td>Cardiologia</td>
-                    <td>(31) 99999-0001</td>
-                    <td>ricardo.almeida@medvita.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-danger btn-sm">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
-                        Remover
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>Dra. Camila Souza</td>
-                    <td>CRM 222333-MG</td>
-                    <td>Clínica Geral</td>
-                    <td>(31) 99999-0002</td>
-                    <td>camila.souza@medvita.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-danger btn-sm">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
-                        Remover
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>Dr. André Lima</td>
-                    <td>CRM 333444-MG</td>
-                    <td>Ortopedia</td>
-                    <td>(31) 99999-0003</td>
-                    <td>andre.lima@medvita.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-danger btn-sm">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
-                        Remover
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="lista-medicos"></tbody>
               </table>
             </div>
           </div>
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const NOMES_CATEGORIA = {
+        CLINICO_GERAL: 'Clínico geral',
+        ESPECIALISTA: 'Especialista',
+        CIRURGIAO: 'Cirurgião',
+      };
+
+      const form = document.querySelector('form');
+      const categoria = document.getElementById('categoria');
+      const especialidade = document.getElementById('especialidade');
+      const grupoEspecialidade = document.getElementById('grupo-especialidade');
+      const grupoArea = document.getElementById('grupo-area');
+      const tabela = document.getElementById('lista-medicos');
+      const mensagem = document.getElementById('mensagem');
+
+      function mostrarMensagem(texto, erro) {
+        mensagem.textContent = texto;
+        mensagem.className = erro ? 'badge badge-danger' : 'badge badge-success';
+        mensagem.style.display = '';
+      }
+
+      // mostra o campo certo para cada categoria
+      function atualizarCampos() {
+        grupoEspecialidade.style.display = categoria.value === 'ESPECIALISTA' ? '' : 'none';
+        grupoArea.style.display = categoria.value === 'CIRURGIAO' ? '' : 'none';
+      }
+
+      async function carregarEspecialidades() {
+        const lista = await api.get('/profissionais/especialidades');
+        lista.forEach((e) => especialidade.add(new Option(e.nome, e.valor)));
+      }
+
+      function celula(texto) {
+        const td = document.createElement('td');
+        td.textContent = texto ?? '';
+        return td;
+      }
+
+      async function carregarMedicos() {
+        const medicos = await api.get('/profissionais');
+        tabela.replaceChildren();
+        medicos.forEach((m) => {
+          const linha = document.createElement('tr');
+          linha.append(
+            celula(m.nome),
+            celula(m.registroProfissional),
+            celula(NOMES_CATEGORIA[m.categoria]),
+            celula(m.areaAtuacao),
+            celula(m.telefone),
+            celula(m.email),
+          );
+
+          const acoes = document.createElement('td');
+          acoes.className = 'actions';
+          const botao = document.createElement('button');
+          botao.type = 'button';
+          botao.className = 'btn btn-danger btn-sm';
+          botao.textContent = 'Remover';
+          botao.addEventListener('click', () => remover(m));
+          acoes.append(botao);
+          linha.append(acoes);
+
+          tabela.append(linha);
+        });
+      }
+
+      async function adicionar() {
+        if (!form.reportValidity()) return;   // usa o "required" dos campos
+        const corpo = {
+          tipo: categoria.value,
+          nome: document.getElementById('nome').value,
+          registroProfissional: document.getElementById('registro').value,
+          telefone: document.getElementById('telefone').value,
+          email: document.getElementById('email').value,
+          senha: document.getElementById('senha').value,
+          especialidade: categoria.value === 'ESPECIALISTA' ? (especialidade.value || null) : null,
+          areaCirurgica: categoria.value === 'CIRURGIAO' ? document.getElementById('areaCirurgica').value : null,
+        };
+        try {
+          await api.post('/profissionais', corpo);
+          form.reset();
+          atualizarCampos();
+          mostrarMensagem('Médico cadastrado com sucesso.', false);
+          await carregarMedicos();
+        } catch (erro) {
+          mostrarMensagem(erro.message, true);
+        }
+      }
+
+      async function remover(medico) {
+        if (!confirm(`Remover ${medico.nome}?`)) return;
+        try {
+          await api.delete(`/profissionais/${medico.id}`);
+          mostrarMensagem('Médico removido.', false);
+          await carregarMedicos();
+        } catch (erro) {
+          mostrarMensagem(erro.message, true);   // ex.: "Profissional com atendimentos ... não pode ser removido"
+        }
+      }
+
+      categoria.addEventListener('change', atualizarCampos);
+      document.getElementById('btn-adicionar').addEventListener('click', adicionar);
+      carregarEspecialidades();
+      carregarMedicos();
+    </script>
   </body>
 </html>

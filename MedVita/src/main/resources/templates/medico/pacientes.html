@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Pacientes</title>
 
@@ -113,45 +115,94 @@
                   </tr>
                 </thead>
 
-                <tbody>
-                  <tr>
-                    <td>Leonardo Martins</td>
-                    <td>123.456.789-00</td>
-                    <td>10/05/1998</td>
-                    <td>(31) 98888-0001</td>
-                    <td>leonardo@email.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>Mariana Costa</td>
-                    <td>987.654.321-00</td>
-                    <td>22/11/1990</td>
-                    <td>(31) 98888-0002</td>
-                    <td>mariana@email.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>João Pedro Santos</td>
-                    <td>456.789.123-00</td>
-                    <td>03/02/1985</td>
-                    <td>(31) 98888-0003</td>
-                    <td>joaopedro@email.com</td>
-                    <td class="actions">
-                      <button type="button" class="btn btn-outline btn-sm">Ver ficha</button>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="lista-pacientes"></tbody>
               </table>
+            </div>
+          </div>
+
+          <div class="card" id="ficha" style="display: none">
+            <div class="card-header">
+              <div>
+                <h2 id="ficha-nome">Ficha do paciente</h2>
+                <p>Dados cadastrais do paciente.</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group"><label>CPF</label><input id="ficha-cpf" disabled /></div>
+              <div class="form-group"><label>Nascimento</label><input id="ficha-nascimento" disabled /></div>
+              <div class="form-group"><label>Telefone</label><input id="ficha-telefone" disabled /></div>
+              <div class="form-group"><label>E-mail</label><input id="ficha-email" disabled /></div>
+              <div class="form-group full-width"><label>Endereço</label><input id="ficha-endereco" disabled /></div>
             </div>
           </div>
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const busca = document.getElementById('busca');
+      const tabela = document.getElementById('lista-pacientes');
+      let espera;
+
+      function formatarCpf(cpf) {
+        return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '';
+      }
+
+      function formatarData(data) {          // "1998-05-10" -> "10/05/1998"
+        if (!data) return '';
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+      }
+
+      function celula(texto) {
+        const td = document.createElement('td');
+        td.textContent = texto ?? '';
+        return td;
+      }
+
+      async function carregar() {
+        const texto = busca.value.trim();
+        const url = texto ? `/pacientes?busca=${encodeURIComponent(texto)}` : '/pacientes';
+        const pacientes = await api.get(url);
+        tabela.replaceChildren();
+        pacientes.forEach((p) => {
+          const linha = document.createElement('tr');
+          linha.append(celula(p.nome), celula(formatarCpf(p.cpf)), celula(formatarData(p.dataNascimento)),
+                       celula(p.telefone), celula(p.email));
+          const acoes = document.createElement('td');
+          acoes.className = 'actions';
+          const botao = document.createElement('button');
+          botao.type = 'button';
+          botao.className = 'btn btn-outline btn-sm';
+          botao.textContent = 'Ver ficha';
+          botao.addEventListener('click', () => verFicha(p.id));
+          acoes.append(botao);
+          linha.append(acoes);
+          tabela.append(linha);
+        });
+      }
+
+      async function verFicha(id) {
+        const p = await api.get(`/pacientes/${id}`);
+        document.getElementById('ficha-nome').textContent = p.nome;
+        document.getElementById('ficha-cpf').value = formatarCpf(p.cpf);
+        document.getElementById('ficha-nascimento').value = formatarData(p.dataNascimento);
+        document.getElementById('ficha-telefone').value = p.telefone;
+        document.getElementById('ficha-email').value = p.email;
+        document.getElementById('ficha-endereco').value = p.endereco;
+        const ficha = document.getElementById('ficha');
+        ficha.style.display = '';
+        ficha.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // busca enquanto digita, esperando 300 ms depois da última tecla
+      busca.addEventListener('input', () => {
+        clearTimeout(espera);
+        espera = setTimeout(carregar, 300);
+      });
+
+      carregar();
+    </script>
   </body>
 </html>

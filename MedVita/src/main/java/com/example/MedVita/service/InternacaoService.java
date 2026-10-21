@@ -8,14 +8,18 @@ package com.example.MedVita.service;
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
- * USA: InternacaoRepository, QuartoRepository, PacienteService,
- *      ProfissionalSaudeService
+ * USA (só repositórios, para não depender do service de ninguém)
+ *   InternacaoRepository, QuartoRepository   (desta parte)
+ *   PacienteRepository                       (já existe) -> findById
+ *   PacienteService.buscarPorEmail           (já existe) -> paciente logado
+ *   ProfissionalSaudeRepository              (Leonardo Martins) -> findById
  *
  * MÉTODOS
  *   @Transactional
  *   Internacao internar(InternacaoRequest req)
- *     1. paciente = pacienteService.buscarPorId(...)
- *        profissional = profissionalSaudeService.buscarPorId(...)
+ *     1. paciente = pacienteRepository.findById(...)
+ *        profissional = profissionalSaudeRepository.findById(...)
+ *        (os dois com .orElseThrow(() -> new RecursoNaoEncontradoException(...)))
  *        quarto = quartoRepository.buscarParaAtualizar(quartoId)   (trava a linha)
  *                 -> RecursoNaoEncontradoException se não existir
  *     2. internacaoRepository.existsByPacienteIdAndStatus(pacienteId, ATIVA)

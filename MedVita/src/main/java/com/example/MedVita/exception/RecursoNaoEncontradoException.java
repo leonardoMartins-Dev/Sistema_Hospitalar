@@ -6,7 +6,7 @@ package com.example.MedVita.exception;
  * =========================================================
  *
  * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
- * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2), no PRIMEIRO dia: todo mundo usa.
+ * RESPONSÁVEL: Leonardo Martins (Sprint 2), nos PRIMEIROS DIAS: todo mundo usa.
  *
  * QUANDO É LANÇADA
  * Quando um service procura algo pelo id e não acha.
@@ -21,3 +21,9 @@ package com.example.MedVita.exception;
  * RESPOSTA
  * O GlobalExceptionHandler devolve HTTP 404 com {"timestamp", "message"}.
  */
+
+public class RecursoNaoEncontradoException extends RuntimeException {
+    public RecursoNaoEncontradoException(String message) {
+        super(message);
+    }
+}

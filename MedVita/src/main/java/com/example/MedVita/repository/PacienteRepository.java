@@ -1,6 +1,7 @@
 package com.example.MedVita.repository;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -43,5 +44,9 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
     Optional <Paciente> findByEmail(String email);
     boolean existsByEmail(String email);
+    boolean existsByCpf(String cpf);
+
+    List<Paciente> findByNomeContainingIgnoreCaseOrCpfContainingOrEmailContainingIgnoreCase(
+            String nome, String cpf, String email);
 
 }

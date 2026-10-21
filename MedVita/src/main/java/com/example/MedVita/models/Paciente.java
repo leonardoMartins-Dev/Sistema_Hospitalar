@@ -2,6 +2,8 @@ package com.example.MedVita.models;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,7 +48,7 @@ import jakarta.persistence.Table;
  * supabase/schema.sql. Se mudar algum campo aqui, mude também no banco.
  *
  * =========================================================
- * A CRIAR (Sprint 2, responsável: João Pedro)
+ * A CRIAR (Sprint 2, responsável: Leonardo Martins)
  * =========================================================
  * A Sprint 2 não muda o paciente. Os atributos do Requisito 1 já estão todos
  * aqui. Falta só:
@@ -65,6 +67,7 @@ public class Paciente {
     @Column (nullable = false, unique = true) //N pode ser NULL nem repetir
     private String email;
 
+    @JsonIgnore
     @Column (name = "password_hash", nullable = false)
     private String passwordHash;
 

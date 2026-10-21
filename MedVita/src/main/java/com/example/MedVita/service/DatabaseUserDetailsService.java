@@ -1,5 +1,7 @@
 package com.example.MedVita.service;
 
+import java.util.Optional;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.MedVita.config.UserConfig;
 import com.example.MedVita.models.Paciente;
+import com.example.MedVita.models.ProfissionalSaude;
 
 /**
  * PONTE ENTRE O SPRING SECURITY E OS USUÁRIOS DO SISTEMA.
@@ -24,8 +27,8 @@ import com.example.MedVita.models.Paciente;
  *                  /register).
  *   3. MÉDICO   -> da tabela "profissionais_saude" (cadastro pelo admin na
  *                  página /admin/medicos).
- *                  A CRIAR (Sprint 2, responsável: João Pedro): se o e-mail
- *                  não for de paciente, procurar com
+ *                  A CRIAR (Sprint 2, responsável: Leonardo Martins): se o
+ *                  e-mail não for de paciente, procurar com
  *                  profissionalSaudeService.buscarPorEmail(username) e, se
  *                  achar, devolver .roles("MEDICO"). Vale para as três
  *                  categorias (clínico, especialista e cirurgião): todas
@@ -62,6 +65,7 @@ import com.example.MedVita.models.Paciente;
 public class DatabaseUserDetailsService implements UserDetailsService {
 
     private final PacienteService pacienteService;
+    private final ProfissionalSaudeService profissionalSaudeService;
     private final String adminUsername;
     private final String adminPasswordHash;
     private final String pacienteTesteUsername;
@@ -69,9 +73,10 @@ public class DatabaseUserDetailsService implements UserDetailsService {
     private final String medicoTesteUsername;
     private final String medicoTestePasswordHash;
 
-    public DatabaseUserDetailsService(PacienteService pacienteService, UserConfig userConfig,
+    public DatabaseUserDetailsService(PacienteService pacienteService, ProfissionalSaudeService profissionalSaudeService, UserConfig userConfig,
             PasswordEncoder passwordEncoder) {
         this.pacienteService = pacienteService;
+        this.profissionalSaudeService = profissionalSaudeService;
         this.adminUsername = userConfig.getAdminUsername();
         this.adminPasswordHash = passwordEncoder.encode(userConfig.getAdminPassword());
         this.pacienteTesteUsername = userConfig.getPacienteTesteUsername();
@@ -112,14 +117,23 @@ public class DatabaseUserDetailsService implements UserDetailsService {
         }
 
         // 2. PACIENTE (tabela pacientes)
-        Paciente paciente = pacienteService.buscarPorEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "Usuário não encontrado: " + username));
+        Optional<Paciente> paciente = pacienteService.buscarPorEmail(username);
+        if (paciente.isPresent()) {
+            return User.builder()
+                    .username(paciente.get().getEmail())
+                    .password(paciente.get().getPasswordHash())
+                    .roles("USER")
+                    .build();
+        }
+
+        // 3. MÉDICO (tabela profissionais_saude), qualquer uma das 3 categorias
+        ProfissionalSaude profissional = profissionalSaudeService.buscarPorEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
 
         return User.builder()
-                .username(paciente.getEmail())
-                .password(paciente.getPasswordHash())
-                .roles("USER")
+                .username(profissional.getEmail())
+                .password(profissional.getPasswordHash())
+                .roles("MEDICO")
                 .build();
     }
 }

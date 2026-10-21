@@ -22,7 +22,9 @@ package com.example.MedVita.service;
  *       - disponivel = true -> filtra por quarto.temVaga()
  *   List<Quarto> listarDisponiveis()   -> repository.buscarDisponiveis() (RN4)
  *   Quarto buscarPorId(Long id)        -> RecursoNaoEncontradoException
- *   List<TipoQuarto> listarTipos()     -> Arrays.asList(TipoQuarto.values())
+ *   List<Map<String, String>> listarTipos()
+ *       -> [{"valor": "UTI", "nome": "UTI"}, ...] para o select ("valor" vai de volta
+ *          no POST; "nome" é o que aparece, vindo de getDescricao())
  *
  * A ocupação NÃO muda aqui: só pelo InternacaoService (internar e dar alta),
  * chamando quarto.ocupar() e quarto.liberar().

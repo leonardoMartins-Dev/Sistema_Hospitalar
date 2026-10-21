@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Meus Dados</title>
 
@@ -93,12 +95,12 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label for="nome">Nome completo</label>
-                  <input type="text" id="nome" value="Nome do Paciente" disabled />
+                  <input type="text" id="nome" disabled />
                 </div>
 
                 <div class="form-group">
                   <label for="cpf">CPF</label>
-                  <input type="text" id="cpf" value="000.000.000-00" disabled />
+                  <input type="text" id="cpf" disabled />
                 </div>
 
                 <div class="form-group">
@@ -108,17 +110,17 @@
 
                 <div class="form-group">
                   <label for="telefone">Telefone</label>
-                  <input type="tel" id="telefone" value="(00) 00000-0000" disabled />
+                  <input type="tel" id="telefone" disabled />
                 </div>
 
                 <div class="form-group full-width">
                   <label for="endereco">Endereço</label>
-                  <input type="text" id="endereco" value="Endereço cadastrado" disabled />
+                  <input type="text" id="endereco" disabled />
                 </div>
 
                 <div class="form-group full-width">
                   <label for="email">E-mail</label>
-                  <input type="email" id="email" value="paciente@email.com" disabled />
+                  <input type="email" id="email" disabled />
                 </div>
               </div>
             </form>
@@ -126,5 +128,23 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      function formatarCpf(cpf) {
+        return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '';
+      }
+
+      api.get('/pacientes/perfil')
+        .then((p) => {
+          document.getElementById('nome').value = p.nome;
+          document.getElementById('cpf').value = formatarCpf(p.cpf);
+          document.getElementById('nascimento').value = p.dataNascimento;   // <input type="date"> já aceita "1998-05-10"
+          document.getElementById('telefone').value = p.telefone;
+          document.getElementById('endereco').value = p.endereco;
+          document.getElementById('email').value = p.email;
+        })
+        .catch((erro) => alert(erro.message));
+    </script>
   </body>
 </html>
