@@ -1,11 +1,19 @@
 package com.example.MedVita.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.MedVita.models.Atendimento;
+
 /*
  * =========================================================
  * REPOSITÓRIO DE ATENDIMENTOS  (antigo ConsultaRepository)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE VAI SER
@@ -35,3 +43,13 @@ package com.example.MedVita.repository;
  * Emergência e cirurgia têm repositórios próprios (Leonardo Gonzaga):
  * AtendimentoEmergenciaRepository e ProcedimentoCirurgicoRepository.
  */
+
+public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> {
+
+    List<Atendimento> findByPacienteIdOrderByDataDescHorarioDesc(Long pacienteId);
+
+    List<Atendimento> findByProfissionalIdAndDataOrderByHorario(Long profissionalId, LocalDate data);
+
+    List<Atendimento> findByProfissionalIdAndDataAndHorario(Long profissionalId, LocalDate data,
+            LocalTime horario);
+}
