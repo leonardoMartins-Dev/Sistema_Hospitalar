@@ -168,6 +168,16 @@ public class SecureLoginController {
                 return "medico/consultas";
         }
 
+        @GetMapping("/medico/emergencias")
+        public String medicoEmergencias() {
+                return "medico/emergencias";
+        }
+
+        @GetMapping("/medico/cirurgias")
+        public String medicoCirurgias() {
+                return "medico/cirurgias";
+        }
+
         @GetMapping("/medico/internacoes")
         public String medicoInternacoes() {
                 return "medico/internacoes";
