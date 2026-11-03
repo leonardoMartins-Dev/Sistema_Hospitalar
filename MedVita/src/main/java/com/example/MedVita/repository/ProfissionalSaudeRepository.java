@@ -28,7 +28,7 @@ public interface ProfissionalSaudeRepository extends JpaRepository<ProfissionalS
  * REPOSITÓRIO DE PROFISSIONAIS DA SAÚDE
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * Vai para a main NOS PRIMEIROS DIAS, junto com as classes de profissional:

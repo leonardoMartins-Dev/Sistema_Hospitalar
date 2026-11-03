@@ -54,7 +54,7 @@ public class Cirurgiao extends ProfissionalSaude {
  * CIRURGIÃO  (subclasse de ProfissionalSaude)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * O QUE É (enunciado da Sprint 2)

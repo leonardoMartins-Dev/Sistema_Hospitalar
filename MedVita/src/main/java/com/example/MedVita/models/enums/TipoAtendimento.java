@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: TIPO (MODALIDADE) DE ATENDIMENTO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * POR QUE FICA COM A PARTE DE PROFISSIONAIS

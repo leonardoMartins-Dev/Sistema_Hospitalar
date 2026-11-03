@@ -1,11 +1,30 @@
 package com.example.MedVita.models;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.TipoAtendimento;
+
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 /*
  * =========================================================
  * ATENDIMENTO  (classe ABSTRATA, topo da herança dos atendimentos)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE É
@@ -118,3 +137,92 @@ package com.example.MedVita.models;
  * TELAS: paciente/agendar-consulta, paciente/consultas, medico/consultas,
  *        medico/emergencias, medico/cirurgias, paciente/historico
  */
+
+@Entity
+@Table(name = "atendimentos")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo")
+public abstract class Atendimento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "paciente_id")
+    private Paciente paciente;
+
+    @ManyToOne
+    @JoinColumn(name = "profissional_id")
+    private ProfissionalSaude profissional;
+
+    private LocalDate data;
+    private LocalTime horario;
+    private String motivo;
+    private String observacoes;
+
+    protected Atendimento() {
+    }
+
+    protected Atendimento(Paciente paciente, ProfissionalSaude profissional, LocalDate data,
+            LocalTime horario, String motivo) {
+        this.paciente = paciente;
+        this.profissional = profissional;
+        this.data = data;
+        this.horario = horario;
+        this.motivo = motivo;
+    }
+
+    public final void validar() {
+        if (paciente == null) {
+            throw new RegraNegocioException("Informe o paciente");
+        }
+        if (data == null || horario == null) {
+            throw new RegraNegocioException("Informe a data e o horário");
+        }
+        validarRegrasDaModalidade();
+    }
+
+    protected abstract void validarRegrasDaModalidade();
+
+    protected void verificarProfissional() {
+        if (profissional == null) {
+            throw new RegraNegocioException("Informe o profissional");
+        }
+        profissional.verificarSePodeRealizar(getTipo(), getEspecialidadeExigida());
+    }
+
+    public Especialidade getEspecialidadeExigida() {
+        return null;
+    }
+
+    protected void verificarDataFutura() {
+        if (LocalDateTime.of(data, horario).isBefore(LocalDateTime.now())) {
+            throw new RegraNegocioException("A data e o horário não podem estar no passado");
+        }
+    }
+
+    public abstract TipoAtendimento getTipo();
+    public abstract void iniciar();
+    public abstract void concluir(String observacoes);
+    public abstract void cancelar();
+    public abstract boolean ocupaAgenda();
+    public abstract boolean isConcluido();
+
+    //GETTERS
+
+    public Long getId() { return id; }
+    public Paciente getPaciente() { return paciente; }
+    public ProfissionalSaude getProfissional() { return profissional; }
+    public LocalDate getData() { return data; }
+    public LocalTime getHorario() { return horario; }
+    public String getMotivo() { return motivo; }
+    public String getObservacoes() { return observacoes; }
+
+    //SETTERS
+
+    protected void setProfissional(ProfissionalSaude profissional) { this.profissional = profissional; }
+    protected void setData(LocalDate data) { this.data = data; }
+    protected void setHorario(LocalTime horario) { this.horario = horario; }
+    protected void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+}

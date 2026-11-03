@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: ESPECIALIDADE MÉDICA
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * Usado em: MedicoEspecialista.especialidade,

@@ -220,27 +220,27 @@ Passo a passo detalhado: [PassoAPasso-LeonardoMartins.md](PassoAPasso-LeonardoMa
 
 **Infraestrutura (fase 1, passou do Leonardo Gonzaga)**
 - [ ] `supabase/schema.sql` novo (seção 6), **rodado no Supabase**, e o banco funcionando para o grupo. Mandem o `.env` por mensagem privada, **nunca no git**.
-- [ ] `static/js/api.js` (seção 9)
+- [x] `static/js/api.js` (seção 9)
 
 **Back (contratos, fase 1)**
-- [ ] `models/ProfissionalSaude.java` (abstrata, `podeRealizar`, `podeEncaminhar`, `verificarSePodeRealizar`)
-- [ ] `models/MedicoClinicoGeral.java`, `models/MedicoEspecialista.java`, `models/Cirurgiao.java`
-- [ ] `models/enums/Especialidade.java`, `CategoriaProfissional.java`, `TipoAtendimento.java`
-- [ ] `repository/ProfissionalSaudeRepository.java`
-- [ ] `exception/RegraNegocioException.java`, `exception/RecursoNaoEncontradoException.java`
+- [x] `models/ProfissionalSaude.java` (abstrata, `podeRealizar`, `podeEncaminhar`, `verificarSePodeRealizar`)
+- [x] `models/MedicoClinicoGeral.java`, `models/MedicoEspecialista.java`, `models/Cirurgiao.java`
+- [x] `models/enums/Especialidade.java`, `CategoriaProfissional.java`, `TipoAtendimento.java`
+- [x] `repository/ProfissionalSaudeRepository.java`
+- [x] `exception/RegraNegocioException.java`, `exception/RecursoNaoEncontradoException.java`
 
 **Back (depois)**
-- [ ] `exception/GlobalExceptionHandler.java`: handlers de 404, 400, 409 e JSON inválido
-- [ ] `dto/ProfissionalRequest.java`, `service/ProfissionalSaudeService.java`, `controller/ProfissionalSaudeController.java`
-- [ ] `service/DatabaseUserDetailsService.java`: login do médico pelo banco
-- [ ] `config/SecurityConfig.java`: `@EnableMethodSecurity`, liberar `/js/**` (ver o bloco "A CRIAR")
-- [ ] Pendências do paciente: `@JsonIgnore` no `Paciente.passwordHash`; `PacienteRepository` (`existsByCpf`, busca); `PacienteService` (`listar`, `buscar`, `buscarPorId`, CPF repetido); `controller/PacienteController.java`
+- [x] `exception/GlobalExceptionHandler.java`: handlers de 404, 400, 409 e JSON inválido
+- [x] `dto/ProfissionalRequest.java`, `service/ProfissionalSaudeService.java`, `controller/ProfissionalSaudeController.java`
+- [x] `service/DatabaseUserDetailsService.java`: login do médico pelo banco
+- [x] `config/SecurityConfig.java`: `@EnableMethodSecurity`, liberar `/js/**` (ver o bloco "A CRIAR")
+- [x] Pendências do paciente: `@JsonIgnore` no `Paciente.passwordHash`; `PacienteRepository` (`existsByCpf`, busca); `PacienteService` (`listar`, `buscar`, `buscarPorId`, CPF repetido); `controller/PacienteController.java`
 
 **Telas**
-- [ ] `admin/medicos`: select **Categoria** (clínico, especialista, cirurgião); campo Especialidade só para especialista; campo Área cirúrgica só para cirurgião; campo **Senha**; tabela com Categoria e Área de atuação; botão remover.
-- [ ] `medico/pacientes`: `GET /pacientes?busca=`
-- [ ] `paciente/perfil`: `GET /pacientes/perfil`
-- [ ] (opcional) números do painel `admin/admin`
+- [x] `admin/medicos`: select **Categoria** (clínico, especialista, cirurgião); campo Especialidade só para especialista; campo Área cirúrgica só para cirurgião; campo **Senha**; tabela com Categoria e Área de atuação; botão remover.
+- [x] `medico/pacientes`: `GET /pacientes?busca=`
+- [x] `paciente/perfil`: `GET /pacientes/perfil`
+- [x] (opcional) números do painel `admin/admin`
 
 ### João Pedro: Consultas
 Depende só dos contratos do Leonardo Martins.

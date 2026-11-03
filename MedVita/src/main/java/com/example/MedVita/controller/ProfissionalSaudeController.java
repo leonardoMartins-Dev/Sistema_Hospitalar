@@ -67,7 +67,7 @@ public class ProfissionalSaudeController {
  * CONTROLLER DE PROFISSIONAIS DA SAÚDE  (/profissionais)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * O QUE É
