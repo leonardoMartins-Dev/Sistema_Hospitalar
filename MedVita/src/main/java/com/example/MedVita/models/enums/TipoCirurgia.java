@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: TIPO DE CIRURGIA
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Gonzaga (Sprint 2)
  *
  * O enunciado pede "tipo de cirurgia" no procedimento cirúrgico.
@@ -17,3 +17,19 @@ package com.example.MedVita.models.enums;
  *
  * ATRIBUTO: String descricao + getDescricao()
  */
+public enum TipoCirurgia {
+
+    ELETIVA("Eletiva"),
+    URGENCIA("Urgência"),
+    EMERGENCIA("Emergência");
+
+    private final String descricao;
+
+    TipoCirurgia(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+}
