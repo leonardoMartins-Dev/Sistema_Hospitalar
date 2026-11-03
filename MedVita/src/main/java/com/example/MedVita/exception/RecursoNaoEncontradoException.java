@@ -5,7 +5,7 @@ package com.example.MedVita.exception;
  * EXCEÇÃO: RECURSO NÃO ENCONTRADO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2), nos PRIMEIROS DIAS: todo mundo usa.
  *
  * QUANDO É LANÇADA

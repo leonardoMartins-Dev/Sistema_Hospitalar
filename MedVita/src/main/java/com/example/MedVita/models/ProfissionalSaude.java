@@ -91,7 +91,7 @@ public abstract class ProfissionalSaude{
  * PROFISSIONAL DA SAÚDE  (classe ABSTRATA, topo da herança)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * O QUE MUDOU NA SPRINT 2

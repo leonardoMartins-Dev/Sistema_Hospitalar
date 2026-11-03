@@ -133,7 +133,7 @@ public class ProfissionalSaudeService {
  * SERVIÇO DE PROFISSIONAIS DA SAÚDE
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * USA: ProfissionalSaudeRepository, PacienteService (e-mail repetido; também

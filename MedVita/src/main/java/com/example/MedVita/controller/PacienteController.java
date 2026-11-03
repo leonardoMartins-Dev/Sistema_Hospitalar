@@ -50,7 +50,7 @@ public class PacienteController {
  * CONTROLLER DE PACIENTES  (/pacientes)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Leonardo Martins (Sprint 2)
  *
  * O QUE É
