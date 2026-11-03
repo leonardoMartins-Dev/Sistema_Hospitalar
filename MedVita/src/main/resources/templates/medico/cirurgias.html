@@ -1,0 +1,359 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- token CSRF para os POST/PUT da API (lido pelo api.js) -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <title>MEDVITA - Cirurgias</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+  </head>
+
+  <body>
+    <div class="dash-shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <img th:src="@{/images/Logo.png}" alt="Logo MEDVITA" />
+          <div class="sidebar-logo-text">
+            <span>MEDVITA</span>
+            <svg class="sidebar-pulse" viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 12h20l5-8 7 16 6-12 4 8h6l5-9 4 5h20"/></svg>
+          </div>
+        </div>
+
+        <div class="sidebar-role"><span>Área Médica</span></div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/medico}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/></svg>
+            Painel
+          </a>
+
+          <a th:href="@{/medico/pacientes}">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/></svg>
+            Pacientes
+          </a>
+
+          <a th:href="@{/medico/consultas}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg>
+            Consultas
+          </a>
+
+          <a th:href="@{/medico/emergencias}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+            Emergências
+          </a>
+
+          <a th:href="@{/medico/cirurgias}" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 20 14 10"/><path d="M13 5l6 6-3 3-6-6z"/></svg>
+            Cirurgias
+          </a>
+
+          <a th:href="@{/medico/internacoes}">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg>
+            Internações
+          </a>
+
+          <a th:href="@{/medico/quartos}">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg>
+            Quartos
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a th:href="@{/medico}" class="btn-back">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+            Voltar ao Painel
+          </a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="topbar-title">
+            <span class="eyebrow">MEDVITA · Área Médica</span>
+            <h1>Cirurgias</h1>
+            <p>Agende e acompanhe os procedimentos cirúrgicos.</p>
+          </div>
+        </div>
+
+        <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Agendar procedimento</h2>
+                <p>Data e horário previstos. Só cirurgiões podem ser responsáveis.</p>
+              </div>
+            </div>
+
+            <form id="form-cirurgia">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="paciente">Paciente</label>
+                  <select id="paciente" name="paciente" required>
+                    <option value="" selected disabled>Selecione o paciente</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="cirurgiao">Cirurgião</label>
+                  <select id="cirurgiao" name="cirurgiao" required>
+                    <option value="" selected disabled>Selecione o cirurgião</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="data">Data prevista</label>
+                  <input type="date" id="data" name="data" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="horario">Horário previsto</label>
+                  <input type="time" id="horario" name="horario" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="tipoCirurgia">Tipo de cirurgia</label>
+                  <select id="tipoCirurgia" name="tipoCirurgia" required>
+                    <option value="" selected disabled>Selecione o tipo</option>
+                    <option value="ELETIVA">Eletiva</option>
+                    <option value="URGENCIA">Urgência</option>
+                    <option value="EMERGENCIA">Emergência</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="descricao">Procedimento</label>
+                  <input type="text" id="descricao" name="descricao" placeholder="Ex.: Apendicectomia" required />
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="obsPre">Observações pré-operatórias</label>
+                  <textarea id="obsPre" name="obsPre" placeholder="Ex.: Jejum de 8 horas"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                  Agendar Procedimento
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Procedimentos do cirurgião</h2>
+                <p>Agendados, em andamento, concluídos e cancelados.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="filtro-cirurgiao">Cirurgião</label>
+                <select id="filtro-cirurgiao">
+                  <option value="" selected disabled>Selecione o cirurgião</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="margin-top: 1.4rem">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Previsto</th>
+                    <th>Paciente</th>
+                    <th>Procedimento</th>
+                    <th>Tipo</th>
+                    <th>Realizado</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody id="tabela-cirurgias">
+                  <tr>
+                    <td colspan="7" class="muted">Selecione um cirurgião para ver os procedimentos.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-cirurgias");
+      const filtroCirurgiao = document.getElementById("filtro-cirurgiao");
+
+      const textoTipo = { ELETIVA: "Eletiva", URGENCIA: "Urgência", EMERGENCIA: "Emergência" };
+
+      const corStatus = {
+        AGENDADO: "badge-info",
+        EM_ANDAMENTO: "badge-warning",
+        CONCLUIDO: "badge-success",
+        CANCELADO: "badge-danger",
+      };
+      const textoStatus = {
+        AGENDADO: "Agendado",
+        EM_ANDAMENTO: "Em andamento",
+        CONCLUIDO: "Concluído",
+        CANCELADO: "Cancelado",
+      };
+
+      // DATA E HORA EFETIVAS (INÍCIO E FIM), QUANDO HOUVER
+      function realizado(p) {
+        if (!p.inicioEfetivo) return "--";
+        let texto = "Início: " + api.formatarDataHora(p.inicioEfetivo);
+        if (p.fimEfetivo) texto += "<br />Fim: " + api.formatarDataHora(p.fimEfetivo);
+        return texto;
+      }
+
+      // PREENCHE OS SELECTS DE PACIENTE E CIRURGIÃO
+      async function carregarSelects() {
+        try {
+          const pacientes = await api.get("/pacientes");
+          const selectPaciente = document.getElementById("paciente");
+          pacientes.forEach((p) => {
+            selectPaciente.add(new Option(p.nome + " (CPF " + p.cpf + ")", p.id));
+          });
+
+          const cirurgioes = await api.get("/profissionais?categoria=CIRURGIAO");
+          const selectCirurgiao = document.getElementById("cirurgiao");
+          cirurgioes.forEach((c) => {
+            const texto = c.nome + " · " + c.areaAtuacao;
+            selectCirurgiao.add(new Option(texto, c.id));
+            filtroCirurgiao.add(new Option(texto, c.id));
+          });
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // MONTA A TABELA DE PROCEDIMENTOS DO CIRURGIÃO ESCOLHIDO
+      async function carregarProcedimentos() {
+        if (!filtroCirurgiao.value) return;
+
+        try {
+          const lista = await api.get("/consultas/procedimentos?cirurgiaoId=" + filtroCirurgiao.value);
+
+          if (lista.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="7" class="muted">Nenhum procedimento para este cirurgião.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = lista
+            .map((p) => {
+              let acoes = '<span class="muted">--</span>';
+              if (p.status === "AGENDADO") {
+                acoes = `<button type="button" class="btn btn-sm" onclick="iniciar(${p.id})">Iniciar</button>
+                         <button type="button" class="btn btn-outline btn-sm" onclick="concluir(${p.id})">Concluir</button>
+                         <button type="button" class="btn btn-danger btn-sm" onclick="cancelar(${p.id})">Cancelar</button>`;
+              } else if (p.status === "EM_ANDAMENTO") {
+                acoes = `<button type="button" class="btn btn-outline btn-sm" onclick="concluir(${p.id})">Concluir</button>`;
+              }
+
+              return `<tr>
+                <td>${api.formatarData(p.data)} ${api.formatarHora(p.horario)}</td>
+                <td>${api.escapar(p.paciente.nome)}</td>
+                <td>${api.escapar(p.descricaoProcedimento)}</td>
+                <td>${textoTipo[p.tipoCirurgia]}</td>
+                <td${p.inicioEfetivo ? "" : ' class="muted"'}>${realizado(p)}</td>
+                <td><span class="badge ${corStatus[p.status]}">${textoStatus[p.status]}</span></td>
+                <td class="actions">${acoes}</td>
+              </tr>`;
+            })
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="7" class="muted">Não foi possível carregar os procedimentos.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // AGENDAR NOVO PROCEDIMENTO
+      document.getElementById("form-cirurgia").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const cirurgiaoId = document.getElementById("cirurgiao").value;
+
+        try {
+          await api.post("/consultas/cirurgias", {
+            pacienteId: Number(document.getElementById("paciente").value),
+            cirurgiaoId: Number(cirurgiaoId),
+            data: document.getElementById("data").value,
+            horario: document.getElementById("horario").value,
+            descricaoProcedimento: document.getElementById("descricao").value,
+            tipoCirurgia: document.getElementById("tipoCirurgia").value,
+            observacoesPreOperatorias: document.getElementById("obsPre").value,
+          });
+
+          evento.target.reset();
+          api.mostrarMensagem(mensagem, "Procedimento agendado.", "sucesso");
+
+          // mostra a lista do cirurgião que acabou de receber o procedimento
+          filtroCirurgiao.value = cirurgiaoId;
+          carregarProcedimentos();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      // INICIAR, CONCLUIR E CANCELAR USAM AS ROTAS GENÉRICAS DO ConsultaController
+      async function iniciar(id) {
+        try {
+          await api.put("/consultas/" + id + "/iniciar");
+          api.mostrarMensagem(mensagem, "Procedimento iniciado.", "sucesso");
+          carregarProcedimentos();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      async function concluir(id) {
+        const observacoes = prompt("Observações pós-operatórias:");
+        if (observacoes === null) return; // cancelou
+
+        try {
+          await api.put("/consultas/" + id + "/concluir", { observacoes: observacoes });
+          api.mostrarMensagem(mensagem, "Procedimento concluído.", "sucesso");
+          carregarProcedimentos();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      async function cancelar(id) {
+        if (!confirm("Cancelar este procedimento?")) return;
+
+        try {
+          await api.put("/consultas/" + id + "/cancelar");
+          api.mostrarMensagem(mensagem, "Procedimento cancelado.", "sucesso");
+          carregarProcedimentos();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      filtroCirurgiao.addEventListener("change", carregarProcedimentos);
+
+      carregarSelects();
+    </script>
+  </body>
+</html>

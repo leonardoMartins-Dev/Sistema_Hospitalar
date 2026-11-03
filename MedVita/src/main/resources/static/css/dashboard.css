@@ -1023,6 +1023,33 @@ table.table td.actions {
 }
 
 /* ==========================================================================
+   MENSAGENS (sucesso / erro das chamadas da API, ver static/js/api.js)
+   ========================================================================== */
+
+.alert {
+  padding: 0.85rem 1.1rem;
+
+  margin-bottom: 1.4rem;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.alert-success {
+  color: var(--success);
+  background-color: var(--success-bg);
+  border: 1px solid #bfe8d4;
+}
+
+.alert-danger {
+  color: var(--danger);
+  background-color: var(--danger-bg);
+  border: 1px solid #f0c4c8;
+}
+
+/* ==========================================================================
    ACESSIBILIDADE
    ========================================================================== */
 

@@ -265,16 +265,16 @@ Depende só dos contratos do Leonardo Martins.
 Depende da classe `Atendimento` (João Pedro) e dos contratos do Leonardo Martins. Não mexe em nenhum arquivo deles. O banco (`schema.sql`) e o `api.js` passaram para o Leonardo Martins: se precisar de alguma coluna, peça a ele.
 
 **Back**
-- [ ] `models/AtendimentoEmergencia.java`, `models/ProcedimentoCirurgico.java`
-- [ ] `models/enums/StatusEmergencia.java`, `StatusProcedimento.java`, `Prioridade.java`, `TipoCirurgia.java`
-- [ ] `dto/EmergenciaRequest.java`, `dto/CirurgiaRequest.java`
-- [ ] `repository/AtendimentoEmergenciaRepository.java`, `repository/ProcedimentoCirurgicoRepository.java`
-- [ ] `service/EmergenciaCirurgiaService.java`, `controller/EmergenciaCirurgiaController.java`
+- [x] `models/AtendimentoEmergencia.java`, `models/ProcedimentoCirurgico.java`
+- [x] `models/enums/StatusEmergencia.java`, `StatusProcedimento.java`, `Prioridade.java`, `TipoCirurgia.java`
+- [x] `dto/EmergenciaRequest.java`, `dto/CirurgiaRequest.java`
+- [x] `repository/AtendimentoEmergenciaRepository.java`, `repository/ProcedimentoCirurgicoRepository.java`
+- [x] `service/EmergenciaCirurgiaService.java`, `controller/EmergenciaCirurgiaController.java`
 
 **Telas (novas, obrigatórias: como a API só é testada pelas telas, sem elas não dá para demonstrar emergência e cirurgia)**
-- [ ] `medico/emergencias`: registrar emergência (paciente, queixa, prioridade); fila por prioridade; assumir; concluir (rota genérica `/consultas/{id}/concluir`).
-- [ ] `medico/cirurgias`: agendar procedimento (paciente, cirurgião, data/hora prevista, descrição, tipo, obs. pré); iniciar, concluir (obs. pós) e cancelar pelas rotas genéricas.
-- [ ] Rotas `/medico/emergencias` e `/medico/cirurgias` no `SecureLoginController` e links no menu lateral das páginas do médico (façam isso **por último**, depois que os outros terminarem as telas do médico, para não dar conflito).
+- [x] `medico/emergencias`: registrar emergência (paciente, queixa, prioridade); fila por prioridade; assumir; concluir (rota genérica `/consultas/{id}/concluir`).
+- [x] `medico/cirurgias`: agendar procedimento (paciente, cirurgião, data/hora prevista, descrição, tipo, obs. pré); iniciar, concluir (obs. pós) e cancelar pelas rotas genéricas.
+- [x] Rotas `/medico/emergencias` e `/medico/cirurgias` no `SecureLoginController` e links no menu lateral das páginas do médico (façam isso **por último**, depois que os outros terminarem as telas do médico, para não dar conflito).
 
 ### Henrique: Quartos, internações e histórico
 Depende só dos contratos do Leonardo Martins. O histórico, feito por último, usa também a classe `Atendimento` do João Pedro.
