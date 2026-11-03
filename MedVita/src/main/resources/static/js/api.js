@@ -16,6 +16,13 @@
  *   api.get(url)            api.post(url, corpo)
  *   api.put(url, corpo)     api.delete(url)
  *
+ * Funções de ajuda para as telas (Leonardo Gonzaga, emergência e cirurgia):
+ *   api.mostrarMensagem(elemento, texto, tipo)  caixa de aviso ('sucesso' ou 'erro')
+ *   api.escapar(texto)                          use ao montar HTML com dados digitados
+ *   api.formatarData('2026-11-20')              -> '20/11/2026'
+ *   api.formatarHora('07:00:00')                -> '07:00'
+ *   api.formatarDataHora('2026-11-20T07:15:30') -> '20/11/2026 07:15'
+ *
  * Todas devolvem uma Promise com o JSON da resposta (ou null quando a
  * resposta vem vazia, como no 204 do DELETE). Se o servidor responder com
  * erro, lançam um Error com a mensagem que o GlobalExceptionHandler mandou
@@ -66,10 +73,55 @@ const api = (() => {
     return dados;
   }
 
+  // caixa de mensagem (sucesso ou erro) dentro da página
+  function mostrarMensagem(elemento, texto, tipo) {
+    if (!elemento) return;
+
+    elemento.textContent = texto;
+    elemento.className = 'alert ' + (tipo === 'sucesso' ? 'alert-success' : 'alert-danger');
+    elemento.hidden = false;
+  }
+
+  // evita que um texto digitado vire HTML ao montar as tabelas
+  function escapar(texto) {
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // '2026-11-20' -> '20/11/2026'
+  function formatarData(data) {
+    if (!data) return '--';
+    const partes = String(data).split('-');
+    return partes[2] + '/' + partes[1] + '/' + partes[0];
+  }
+
+  // '07:00:00' -> '07:00'
+  function formatarHora(hora) {
+    if (!hora) return '--';
+    return String(hora).substring(0, 5);
+  }
+
+  // '2026-11-20T07:15:30' -> '20/11/2026 07:15'
+  function formatarDataHora(dataHora) {
+    if (!dataHora) return '--';
+    const [data, hora] = String(dataHora).split('T');
+    return formatarData(data) + ' ' + formatarHora(hora);
+  }
+
   return {
     get: (url) => chamar('GET', url),
     post: (url, corpo) => chamar('POST', url, corpo),
     put: (url, corpo) => chamar('PUT', url, corpo),
     delete: (url) => chamar('DELETE', url),
+    mostrarMensagem,
+    escapar,
+    formatarData,
+    formatarHora,
+    formatarDataHora,
   };
 })();
