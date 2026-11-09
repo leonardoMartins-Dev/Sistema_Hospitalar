@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Minhas Consultas</title>
 
@@ -136,6 +138,36 @@
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
+          <div class="card" id="card-reagendar" hidden>
+            <div class="card-header">
+              <div>
+                <h2>Reagendar consulta</h2>
+                <p>Uma consulta nova é criada; a antiga continua no histórico.</p>
+              </div>
+            </div>
+
+            <form id="form-reagendar">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="nova-data">Nova data</label>
+                  <input type="date" id="nova-data" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="novo-horario">Novo horário</label>
+                  <input type="time" id="novo-horario" required />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn">Reagendar</button>
+                <button type="button" class="btn btn-outline" id="fechar-reagendar">Fechar</button>
+              </div>
+            </form>
+          </div>
+
           <div class="card">
             <div class="card-header">
               <div>
@@ -153,41 +185,14 @@
                     <th>Profissional</th>
                     <th>Especialidade</th>
                     <th>Motivo</th>
+                    <th>Encaminhamento</th>
                     <th>Status</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  <tr>
-                    <td>28/09/2026</td>
-                    <td>14:30</td>
-                    <td>Dr. Ricardo Almeida</td>
-                    <td>Cardiologia</td>
-                    <td>Consulta de rotina</td>
-                    <td><span class="badge badge-info">Agendada</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>10/08/2026</td>
-                    <td>09:00</td>
-                    <td>Dra. Camila Souza</td>
-                    <td>Clínica Geral</td>
-                    <td>Check-up anual</td>
-                    <td>
-                      <span class="badge badge-success">Realizada</span>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>02/07/2026</td>
-                    <td>16:00</td>
-                    <td>Dr. André Lima</td>
-                    <td>Ortopedia</td>
-                    <td>Dor no joelho</td>
-                    <td>
-                      <span class="badge badge-danger">Cancelada</span>
-                    </td>
-                  </tr>
+                <tbody id="tabela-consultas">
+                  <tr><td colspan="8" class="muted">Carregando...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -195,5 +200,154 @@
         </div>
       </main>
     </div>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const corStatus = {
+        AGENDADA: "badge-info",
+        CONFIRMADA: "badge-info",
+        EM_ATENDIMENTO: "badge-warning",
+        CONCLUIDA: "badge-success",
+        CANCELADA: "badge-danger",
+        NAO_COMPARECEU: "badge-neutral",
+        AGUARDANDO_AVALIACAO: "badge-warning",
+        CONCLUIDO: "badge-success",
+        AGENDADO: "badge-info",
+        EM_ANDAMENTO: "badge-warning",
+        CANCELADO: "badge-danger",
+      };
+      const textoStatus = {
+        AGENDADA: "Agendada",
+        CONFIRMADA: "Confirmada",
+        EM_ATENDIMENTO: "Em atendimento",
+        CONCLUIDA: "Concluída",
+        CANCELADA: "Cancelada",
+        NAO_COMPARECEU: "Não compareceu",
+        AGUARDANDO_AVALIACAO: "Aguardando avaliação",
+        CONCLUIDO: "Concluído",
+        AGENDADO: "Agendado",
+        EM_ANDAMENTO: "Em andamento",
+        CANCELADO: "Cancelado",
+      };
+      const textoTipo = {
+        ROTINA: "Rotina",
+        ESPECIALIZADA: "Especializada",
+        EMERGENCIA: "Emergência",
+        CIRURGIA: "Cirurgia",
+      };
+      const nomeEspecialidade = {
+        CARDIOLOGIA: "Cardiologia",
+        DERMATOLOGIA: "Dermatologia",
+        GINECOLOGIA: "Ginecologia",
+        NEUROLOGIA: "Neurologia",
+        ORTOPEDIA: "Ortopedia",
+        PEDIATRIA: "Pediatria",
+      };
+
+      function badge(status) {
+        return `<span class="badge ${corStatus[status] || "badge-neutral"}">${textoStatus[status] || api.escapar(status)}</span>`;
+      }
+
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-consultas");
+      const cardReagendar = document.getElementById("card-reagendar");
+      const formReagendar = document.getElementById("form-reagendar");
+      let consultaReagendar = null;
+
+      function especialidadeDe(a) {
+        if (a.especialidade) return nomeEspecialidade[a.especialidade] || a.especialidade;
+        if (a.profissional) return api.escapar(a.profissional.areaAtuacao);
+        return "--";
+      }
+
+      function acoesDe(a) {
+        const botoes = [];
+        if (a.status === "AGENDADA") {
+          botoes.push(`<button type="button" class="btn btn-sm" onclick="confirmar(${a.id})">Confirmar</button>`);
+        }
+        if (a.status === "AGENDADA" || a.status === "CONFIRMADA") {
+          botoes.push(`<button type="button" class="btn btn-danger btn-sm" onclick="cancelar(${a.id})">Cancelar</button>`);
+        }
+        if (a.status === "CANCELADA" || a.status === "NAO_COMPARECEU") {
+          botoes.push(`<button type="button" class="btn btn-outline btn-sm" onclick="abrirReagendar(${a.id})">Reagendar</button>`);
+        }
+        return botoes.length ? botoes.join(" ") : '<span class="muted">--</span>';
+      }
+
+      async function carregar() {
+        try {
+          const lista = await api.get("/consultas/minhas");
+
+          if (lista.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="8" class="muted">Você ainda não tem consultas.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = lista
+            .map((a) => `<tr>
+                <td>${api.formatarData(a.data)}</td>
+                <td>${api.formatarHora(a.horario)}</td>
+                <td>${a.profissional ? api.escapar(a.profissional.nome) : "--"}</td>
+                <td>${especialidadeDe(a)}</td>
+                <td>${api.escapar(a.motivo) || "--"}</td>
+                <td>${a.encaminhamento ? nomeEspecialidade[a.encaminhamento] : '<span class="muted">--</span>'}</td>
+                <td>${badge(a.status)}</td>
+                <td><div style="display: flex; gap: 0.5rem; flex-wrap: wrap">${a.tipo === "ROTINA" || a.tipo === "ESPECIALIZADA" ? acoesDe(a) : '<span class="muted">--</span>'}</div></td>
+              </tr>`)
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="8" class="muted">Não foi possível carregar as consultas.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      async function mudar(id, acao, texto) {
+        try {
+          await api.put("/consultas/" + id + "/" + acao);
+          api.mostrarMensagem(mensagem, texto, "sucesso");
+          carregar();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      function confirmar(id) {
+        mudar(id, "confirmar", "Presença confirmada.");
+      }
+
+      function cancelar(id) {
+        if (!confirm("Cancelar esta consulta?")) return;
+        mudar(id, "cancelar", "Consulta cancelada.");
+      }
+
+      function abrirReagendar(id) {
+        consultaReagendar = id;
+        formReagendar.reset();
+        document.getElementById("nova-data").min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().substring(0, 10);
+        cardReagendar.hidden = false;
+        cardReagendar.scrollIntoView({ behavior: "smooth" });
+      }
+
+      document.getElementById("fechar-reagendar").addEventListener("click", () => {
+        cardReagendar.hidden = true;
+        consultaReagendar = null;
+      });
+
+      formReagendar.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        try {
+          await api.post("/consultas/" + consultaReagendar + "/reagendar", {
+            data: document.getElementById("nova-data").value,
+            horario: document.getElementById("novo-horario").value,
+          });
+          cardReagendar.hidden = true;
+          api.mostrarMensagem(mensagem, "Nova consulta agendada.", "sucesso");
+          carregar();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      carregar();
+    </script>
   </body>
 </html>

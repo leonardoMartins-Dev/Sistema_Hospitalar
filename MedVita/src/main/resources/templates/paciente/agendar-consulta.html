@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Agendar Consulta</title>
 
@@ -81,6 +83,8 @@
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
           <div class="card">
             <div class="card-header">
               <div>
@@ -89,7 +93,7 @@
               </div>
             </div>
 
-            <form>
+            <form id="form-consulta">
               <div class="form-grid">
                 <div class="form-group">
                   <label for="especialidade">Especialidade</label>
@@ -97,24 +101,16 @@
                     <option value="" selected disabled>
                       Selecione a especialidade
                     </option>
-                    <option>Clínica Geral</option>
-                    <option>Cardiologia</option>
-                    <option>Ortopedia</option>
-                    <option>Pediatria</option>
-                    <option>Dermatologia</option>
-                    <option>Ginecologia</option>
+                    <option value="ROTINA">Clínica geral</option>
                   </select>
                 </div>
 
                 <div class="form-group">
                   <label for="profissional">Profissional</label>
-                  <select id="profissional" name="profissional" required>
+                  <select id="profissional" name="profissional" required disabled>
                     <option value="" selected disabled>
-                      Selecione o profissional
+                      Escolha especialidade, data e horário
                     </option>
-                    <option>Dr. Ricardo Almeida - Cardiologia</option>
-                    <option>Dra. Camila Souza - Clínica Geral</option>
-                    <option>Dr. André Lima - Ortopedia</option>
                   </select>
                 </div>
 
@@ -138,19 +134,10 @@
                     required
                   />
                 </div>
-
-                <div class="form-group full-width">
-                  <label for="observacoes">Observações (opcional)</label>
-                  <textarea
-                    id="observacoes"
-                    name="observacoes"
-                    placeholder="Informações adicionais para o profissional"
-                  ></textarea>
-                </div>
               </div>
 
               <div class="form-actions">
-                <button type="button" class="btn">Confirmar agendamento</button>
+                <button type="submit" class="btn">Confirmar agendamento</button>
                 <a th:href="@{/paciente/consultas}" class="btn btn-outline">
                   Cancelar
                 </a>
@@ -160,5 +147,82 @@
         </div>
       </main>
     </div>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const form = document.getElementById("form-consulta");
+      const selectEspecialidade = document.getElementById("especialidade");
+      const selectProfissional = document.getElementById("profissional");
+      const campoData = document.getElementById("data");
+      const campoHorario = document.getElementById("horario");
+
+      campoData.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().substring(0, 10);
+
+      async function carregarEspecialidades() {
+        try {
+          const especialidades = await api.get("/profissionais/especialidades");
+          especialidades.forEach((e) => selectEspecialidade.add(new Option(e.nome, e.valor)));
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      async function carregarProfissionais() {
+        selectProfissional.innerHTML = "";
+        selectProfissional.disabled = true;
+
+        if (!selectEspecialidade.value || !campoData.value || !campoHorario.value) {
+          selectProfissional.add(new Option("Escolha especialidade, data e horário", ""));
+          return;
+        }
+
+        const params = new URLSearchParams({ data: campoData.value, horario: campoHorario.value });
+        if (selectEspecialidade.value !== "ROTINA") {
+          params.set("especialidade", selectEspecialidade.value);
+        }
+
+        try {
+          const lista = await api.get("/consultas/profissionais-disponiveis?" + params);
+          if (lista.length === 0) {
+            selectProfissional.add(new Option("Nenhum profissional livre neste horário", ""));
+            return;
+          }
+          selectProfissional.add(new Option("Selecione o profissional", ""));
+          lista.forEach((p) => selectProfissional.add(new Option(p.nome + " · " + p.areaAtuacao, p.id)));
+          selectProfissional.disabled = false;
+        } catch (erro) {
+          selectProfissional.add(new Option("Não foi possível carregar", ""));
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      [selectEspecialidade, campoData, campoHorario].forEach((campo) =>
+        campo.addEventListener("change", carregarProfissionais)
+      );
+
+      form.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const rotina = selectEspecialidade.value === "ROTINA";
+        try {
+          await api.post("/consultas", {
+            tipo: rotina ? "ROTINA" : "ESPECIALIZADA",
+            especialidade: rotina ? null : selectEspecialidade.value,
+            profissionalId: Number(selectProfissional.value),
+            data: campoData.value,
+            horario: campoHorario.value,
+            motivo: document.getElementById("motivo").value,
+          });
+
+          form.reset();
+          carregarProfissionais();
+          api.mostrarMensagem(mensagem, "Consulta agendada. Confirme a presença em Minhas Consultas.", "sucesso");
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      carregarEspecialidades();
+    </script>
   </body>
 </html>
