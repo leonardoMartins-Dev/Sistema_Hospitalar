@@ -1,11 +1,17 @@
 package com.example.MedVita.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.TipoAtendimento;
+
 /*
  * =========================================================
  * DTO: NOVA CONSULTA  (corpo do POST /consultas)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * POR QUE EXISTE
@@ -35,3 +41,17 @@ package com.example.MedVita.dto;
  *   { "tipo": "ESPECIALIZADA", "profissionalId": 5, "data": "2026-11-12",
  *     "horario": "09:30", "motivo": "Dor no peito", "especialidade": "CARDIOLOGIA" }
  */
+
+public record ConsultaRequest(
+        TipoAtendimento tipo,
+        Long pacienteId,
+        Long profissionalId,
+        LocalDate data,
+        LocalTime horario,
+        String motivo,
+        Especialidade especialidade) {
+
+    public ConsultaRequest comPaciente(Long novoPacienteId) {
+        return new ConsultaRequest(tipo, novoPacienteId, profissionalId, data, horario, motivo, especialidade);
+    }
+}
