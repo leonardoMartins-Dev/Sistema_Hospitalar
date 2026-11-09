@@ -126,12 +126,15 @@ Sistema_Hospitalar/
         │   │   ├── application/   # classe principal (TelaLoginApplication)
         │   │   ├── config/        # Spring Security e reCAPTCHA
         │   │   ├── controller/    # páginas (SecureLoginController) e API REST de cada model
+        │   │   ├── dto/           # corpos dos pedidos da API (ConsultaRequest, ProfissionalRequest...)
         │   │   ├── exception/     # exceções do sistema e tratamento de erros
-        │   │   ├── models/        # Paciente, ProfissionalSaude, Consulta, Internacao, Quarto, HistoricoMedico
+        │   │   ├── models/        # Paciente, ProfissionalSaude (+3 categorias), Atendimento (+4 modalidades),
+        │   │   │   │              # Internacao, Quarto, HistoricoMedico
+        │   │   │   └── enums/     # Especialidade, StatusConsulta, TipoQuarto e os outros enums
         │   │   ├── repository/    # acesso ao banco (Spring Data JPA)
         │   │   └── service/       # regras de negócio
         │   └── resources/
-        │       ├── static/        # CSS e imagens
+        │       ├── static/        # CSS, imagens e js/api.js (chamadas da API pelas telas)
         │       └── templates/     # páginas HTML (login, paciente, medico, admin)
         └── test/                  # testes automatizados dos services
 ```
@@ -140,4 +143,12 @@ Os arquivos marcados com `STATUS: A IMPLEMENTAR` ainda não têm código: cada u
 
 Os documentos do trabalho ficam em `DOCUMENTOS/`, cada tipo na sua própria pasta (ex.: `DOCUMENTOS/DiagramaUML/arquivo`).
 
-MASI MUDANCAS EM BREVE
+## Sprint 2
+
+- **Categorias de profissional:** `ProfissionalSaude` abstrata com `MedicoClinicoGeral`, `MedicoEspecialista` e `Cirurgiao`. Cada uma diz o que pode realizar (`podeRealizar`) e se pode encaminhar (`podeEncaminhar`).
+- **Modalidades de atendimento:** `Atendimento` abstrata, com `ConsultaRotina` e `ConsultaEspecializada` (via `Consulta`), `AtendimentoEmergencia` e `ProcedimentoCirurgico`. As regras comuns ficam em `validar()` e cada modalidade implementa `validarRegrasDaModalidade()`.
+- **Situações da consulta:** enum `StatusConsulta` (agendada, confirmada, em atendimento, concluída, cancelada, não compareceu), com as mudanças permitidas em `podeMudarPara()`. Consulta cancelada é final: reagendar cria uma consulta nova.
+- **Consultas** (`/consultas`): agendar, confirmar, iniciar, concluir com observações, cancelar, registrar falta, reagendar e encaminhar para especialista. As rotas `iniciar`, `concluir` e `cancelar` valem para as 4 modalidades.
+- **Telas ligadas na API:** `paciente/agendar-consulta` (só mostra médicos livres no horário), `paciente/consultas` e `medico/consultas`.
+
+A divisão de tarefas e a lista completa de endpoints estão em [`DOCUMENTOS/Sprint2/DivisaoTarefas.md`](DOCUMENTOS/Sprint2/DivisaoTarefas.md).
