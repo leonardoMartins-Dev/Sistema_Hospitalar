@@ -1,11 +1,26 @@
 package com.example.MedVita.models;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Objects;
+
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.StatusConsulta;
+import com.example.MedVita.models.enums.TipoAtendimento;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 /*
  * =========================================================
  * CONSULTA DE ROTINA  (subclasse de Consulta)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE É (enunciado da Sprint 2)
@@ -52,3 +67,56 @@ package com.example.MedVita.models;
  * TELA: em paciente/agendar-consulta, escolher "Clínica geral" cria uma
  * consulta deste tipo.
  */
+
+@Entity
+@DiscriminatorValue("ROTINA")
+public class ConsultaRotina extends Consulta {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "encaminhamento")
+    private Especialidade encaminhamento;
+
+    protected ConsultaRotina() {
+    }
+
+    public ConsultaRotina(Paciente paciente, ProfissionalSaude profissional, LocalDate data,
+            LocalTime horario, String motivo) {
+        super(paciente, profissional, data, horario, motivo);
+    }
+
+    @Override
+    public TipoAtendimento getTipo() {
+        return TipoAtendimento.ROTINA;
+    }
+
+    @Override
+    protected void validarRegrasDaModalidade() {
+        verificarMotivo();
+        verificarDataFutura();
+        verificarProfissional();
+    }
+
+    public void registrarEncaminhamento(Especialidade especialidade, ProfissionalSaude solicitante) {
+        if (solicitante == null || getProfissional() == null
+                || !Objects.equals(solicitante.getId(), getProfissional().getId())) {
+            throw new RegraNegocioException("Só o médico da consulta pode encaminhar");
+        }
+        if (!solicitante.podeEncaminhar()) {
+            throw new RegraNegocioException("Só o clínico geral pode encaminhar para um especialista");
+        }
+        if (getStatus() != StatusConsulta.EM_ATENDIMENTO && getStatus() != StatusConsulta.CONCLUIDA) {
+            throw new RegraNegocioException("Só é possível encaminhar durante ou depois da consulta");
+        }
+        if (especialidade == null) {
+            throw new RegraNegocioException("Informe a especialidade do encaminhamento");
+        }
+        this.encaminhamento = especialidade;
+    }
+
+    @Override
+    protected Consulta copiar() {
+        return new ConsultaRotina(getPaciente(), getProfissional(), null, null, getMotivo());
+    }
+
+    public Especialidade getEncaminhamento() { return encaminhamento; }
+}

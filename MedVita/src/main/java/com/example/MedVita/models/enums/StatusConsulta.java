@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: SITUAÇÃO DA CONSULTA
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * As 6 situações do enunciado. Substitui o texto livre da Sprint 1
@@ -39,3 +39,40 @@ package com.example.MedVita.models.enums;
  *
  * No banco fica o NOME (@Enumerated(EnumType.STRING)), nunca o número.
  */
+
+public enum StatusConsulta {
+
+    AGENDADA("Agendada"),
+    CONFIRMADA("Confirmada"),
+    EM_ATENDIMENTO("Em atendimento"),
+    CONCLUIDA("Concluída"),
+    CANCELADA("Cancelada"),
+    NAO_COMPARECEU("Não compareceu");
+
+    private final String descricao;
+
+    StatusConsulta(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public boolean podeMudarPara(StatusConsulta novo) {
+        switch (this) {
+            case AGENDADA:
+                return novo == CONFIRMADA || novo == CANCELADA || novo == NAO_COMPARECEU;
+            case CONFIRMADA:
+                return novo == EM_ATENDIMENTO || novo == CANCELADA || novo == NAO_COMPARECEU;
+            case EM_ATENDIMENTO:
+                return novo == CONCLUIDA;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isFinal() {
+        return this == CONCLUIDA || this == CANCELADA || this == NAO_COMPARECEU;
+    }
+}
