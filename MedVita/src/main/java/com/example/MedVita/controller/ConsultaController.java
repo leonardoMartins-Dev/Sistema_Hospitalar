@@ -1,11 +1,41 @@
 package com.example.MedVita.controller;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.MedVita.dto.ConsultaRequest;
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.Atendimento;
+import com.example.MedVita.models.Consulta;
+import com.example.MedVita.models.Paciente;
+import com.example.MedVita.models.ProfissionalSaude;
+import com.example.MedVita.models.enums.Especialidade;
+import com.example.MedVita.models.enums.TipoAtendimento;
+import com.example.MedVita.repository.ProfissionalSaudeRepository;
+import com.example.MedVita.service.ConsultaService;
+import com.example.MedVita.service.PacienteService;
+
 /*
  * =========================================================
  * CONTROLLER DE CONSULTAS  (/consultas)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE É
@@ -67,3 +97,155 @@ package com.example.MedVita.controller;
  *
  * USA: ConsultaService
  */
+
+@RestController
+@RequestMapping("/consultas")
+public class ConsultaController {
+
+    private final ConsultaService consultaService;
+    private final PacienteService pacienteService;
+    private final ProfissionalSaudeRepository profissionalSaudeRepository;
+
+    public ConsultaController(ConsultaService consultaService, PacienteService pacienteService,
+            ProfissionalSaudeRepository profissionalSaudeRepository) {
+        this.consultaService = consultaService;
+        this.pacienteService = pacienteService;
+        this.profissionalSaudeRepository = profissionalSaudeRepository;
+    }
+
+    record ConcluirRequest(String observacoes) {}
+
+    record ReagendarRequest(LocalDate data, LocalTime horario) {}
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public Consulta criar(@RequestBody ConsultaRequest req, Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            req = req.comPaciente(pacienteLogado(authentication).getId());
+        }
+        return consultaService.criar(req);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    public List<Atendimento> listar(@RequestParam(required = false) TipoAtendimento tipo) {
+        return consultaService.listar(tipo);
+    }
+
+    @GetMapping("/minhas")
+    @PreAuthorize("hasRole('USER')")
+    public List<Atendimento> minhas(Authentication authentication) {
+        return consultaService.listarDoPaciente(pacienteLogado(authentication).getId());
+    }
+
+    @GetMapping("/agenda")
+    @PreAuthorize("hasRole('MEDICO')")
+    public List<Atendimento> agenda(@RequestParam(required = false) LocalDate data,
+            Authentication authentication) {
+        return consultaService.agendaDoProfissional(medicoLogado(authentication).getId(),
+                data == null ? LocalDate.now() : data);
+    }
+
+    @GetMapping("/profissionais-disponiveis")
+    public List<ProfissionalSaude> profissionaisDisponiveis(
+            @RequestParam(required = false) Especialidade especialidade,
+            @RequestParam(required = false) LocalDate data,
+            @RequestParam(required = false) LocalTime horario) {
+        return consultaService.profissionaisDisponiveis(especialidade, data, horario);
+    }
+
+    @GetMapping("/{id}")
+    public Atendimento buscarPorId(@PathVariable Long id, Authentication authentication) {
+        Atendimento atendimento = consultaService.buscarPorId(id);
+        if (isPaciente(authentication)) {
+            exigirDono(atendimento, authentication);
+        }
+        return atendimento;
+    }
+
+    @PutMapping("/{id}/iniciar")
+    @PreAuthorize("hasRole('MEDICO')")
+    public Atendimento iniciar(@PathVariable Long id) {
+        return consultaService.iniciar(id);
+    }
+
+    @PutMapping("/{id}/concluir")
+    @PreAuthorize("hasRole('MEDICO')")
+    public Atendimento concluir(@PathVariable Long id, @RequestBody(required = false) ConcluirRequest body) {
+        return consultaService.concluir(id, body == null ? null : body.observacoes());
+    }
+
+    @PutMapping("/{id}/cancelar")
+    @PreAuthorize("hasAnyRole('USER', 'MEDICO', 'ADMIN')")
+    public Atendimento cancelar(@PathVariable Long id, Authentication authentication) {
+        if (isPaciente(authentication)) {
+            exigirDono(consultaService.buscarPorId(id), authentication);
+        }
+        return consultaService.cancelar(id);
+    }
+
+    @PutMapping("/{id}/confirmar")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public Consulta confirmar(@PathVariable Long id, Authentication authentication) {
+        if (isPaciente(authentication)) {
+            exigirDono(consultaService.buscarPorId(id), authentication);
+        }
+        return consultaService.confirmar(id);
+    }
+
+    @PutMapping("/{id}/nao-compareceu")
+    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    public Consulta naoCompareceu(@PathVariable Long id) {
+        return consultaService.registrarFalta(id);
+    }
+
+    @PutMapping("/{id}/encaminhar")
+    @PreAuthorize("hasRole('MEDICO')")
+    public Consulta encaminhar(@PathVariable Long id, @RequestParam Especialidade especialidade,
+            Authentication authentication) {
+        return consultaService.encaminhar(id, especialidade, authentication.getName());
+    }
+
+    @PostMapping("/{id}/reagendar")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public Consulta reagendar(@PathVariable Long id, @RequestBody ReagendarRequest body,
+            Authentication authentication) {
+        if (isPaciente(authentication)) {
+            exigirDono(consultaService.buscarPorId(id), authentication);
+        }
+        if (body == null) {
+            throw new RegraNegocioException("Informe a nova data e o novo horário");
+        }
+        return consultaService.reagendar(id, body.data(), body.horario());
+    }
+
+    private Paciente pacienteLogado(Authentication authentication) {
+        return pacienteService.buscarPorEmail(authentication.getName())
+                .orElseThrow(() -> new RegraNegocioException("Paciente logado não encontrado"));
+    }
+
+    private ProfissionalSaude medicoLogado(Authentication authentication) {
+        return profissionalSaudeRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RegraNegocioException("Profissional logado não encontrado"));
+    }
+
+    private void exigirDono(Atendimento atendimento, Authentication authentication) {
+        if (!consultaService.pertenceAoPaciente(atendimento, authentication.getName())) {
+            throw new AccessDeniedException("Esta consulta não é sua");
+        }
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return temPapel(authentication, "ROLE_ADMIN");
+    }
+
+    private boolean isPaciente(Authentication authentication) {
+        return temPapel(authentication, "ROLE_USER");
+    }
+
+    private boolean temPapel(Authentication authentication, String papel) {
+        return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(papel));
+    }
+}

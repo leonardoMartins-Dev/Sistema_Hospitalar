@@ -246,18 +246,18 @@ Passo a passo detalhado: [PassoAPasso-LeonardoMartins.md](PassoAPasso-LeonardoMa
 Depende só dos contratos do Leonardo Martins.
 
 **Back**
-- [ ] **Contrato (fase 1):** `models/Atendimento.java` (abstrata, `validar()` template, métodos abstratos) e `repository/AtendimentoRepository.java`
-- [ ] `models/Consulta.java` (abstrata, `StatusConsulta`, `mudarStatus`, `reagendar`)
-- [ ] `models/ConsultaRotina.java` (com `registrarEncaminhamento`), `models/ConsultaEspecializada.java`
-- [ ] `models/enums/StatusConsulta.java`
-- [ ] `dto/ConsultaRequest.java`
-- [ ] `service/ConsultaService.java` (inclui `profissionaisDisponiveis`)
-- [ ] `controller/ConsultaController.java`
+- [x] **Contrato (fase 1):** `models/Atendimento.java` (abstrata, `validar()` template, métodos abstratos) e `repository/AtendimentoRepository.java`
+- [x] `models/Consulta.java` (abstrata, `StatusConsulta`, `mudarStatus`, `reagendar`)
+- [x] `models/ConsultaRotina.java` (com `registrarEncaminhamento`), `models/ConsultaEspecializada.java`
+- [x] `models/enums/StatusConsulta.java`
+- [x] `dto/ConsultaRequest.java`
+- [x] `service/ConsultaService.java` (inclui `profissionaisDisponiveis`)
+- [x] `controller/ConsultaController.java`
 
 **Telas**
-- [ ] `paciente/agendar-consulta`: o select de especialidade tem "Clínica geral" (gera `ROTINA`) + `GET /profissionais/especialidades` (gera `ESPECIALIZADA`). Depois de escolher especialidade, data e horário, carrega os médicos em `GET /consultas/profissionais-disponiveis` e faz `POST /consultas`.
-- [ ] `paciente/consultas`: `GET /consultas/minhas`; botões Confirmar, Cancelar e Reagendar conforme a situação; mostrar o encaminhamento, se tiver.
-- [ ] `medico/consultas`: `GET /consultas/agenda?data=`; botões Iniciar, Concluir (pede as observações), Não compareceu e Encaminhar (só na rotina).
+- [x] `paciente/agendar-consulta`: o select de especialidade tem "Clínica geral" (gera `ROTINA`) + `GET /profissionais/especialidades` (gera `ESPECIALIZADA`). Depois de escolher especialidade, data e horário, carrega os médicos em `GET /consultas/profissionais-disponiveis` e faz `POST /consultas`.
+- [x] `paciente/consultas`: `GET /consultas/minhas`; botões Confirmar, Cancelar e Reagendar conforme a situação; mostrar o encaminhamento, se tiver.
+- [x] `medico/consultas`: `GET /consultas/agenda?data=`; botões Iniciar, Concluir (pede as observações), Não compareceu e Encaminhar (só na rotina).
 
 **No fim:** atualizar o `README.md` (estrutura, Sprint 2, tirar o "MASI MUDANCAS EM BREVE").
 

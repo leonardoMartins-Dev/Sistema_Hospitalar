@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <title>MEDVITA - Consultas</title>
 
@@ -86,11 +88,13 @@
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
           <div class="card">
             <div class="card-header">
               <div>
                 <h2>Filtrar agenda</h2>
-                <p>Filtre as consultas por data ou paciente.</p>
+                <p>Escolha o dia da agenda.</p>
               </div>
             </div>
 
@@ -99,16 +103,6 @@
                 <label for="data">Data</label>
                 <input type="date" id="data" name="data" />
               </div>
-
-              <div class="form-group">
-                <label for="paciente">Paciente</label>
-                <select id="paciente" name="paciente">
-                  <option value="" selected>Todos os pacientes</option>
-                  <option>Leonardo Martins</option>
-                  <option>Mariana Costa</option>
-                  <option>João Pedro Santos</option>
-                </select>
-              </div>
             </div>
           </div>
 
@@ -116,7 +110,7 @@
             <div class="card-header">
               <div>
                 <h2>Agenda de consultas</h2>
-                <p>Consultas agendadas, realizadas e canceladas.</p>
+                <p>Atendimentos do dia escolhido.</p>
               </div>
             </div>
 
@@ -127,41 +121,218 @@
                     <th>Data</th>
                     <th>Horário</th>
                     <th>Paciente</th>
+                    <th>Tipo</th>
                     <th>Motivo</th>
+                    <th>Observações</th>
                     <th>Status</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  <tr>
-                    <td>28/09/2026</td>
-                    <td>14:30</td>
-                    <td>Leonardo Martins</td>
-                    <td>Consulta de rotina</td>
-                    <td><span class="badge badge-info">Agendada</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>28/09/2026</td>
-                    <td>16:00</td>
-                    <td>Mariana Costa</td>
-                    <td>Check-up anual</td>
-                    <td><span class="badge badge-info">Agendada</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>10/08/2026</td>
-                    <td>09:00</td>
-                    <td>João Pedro Santos</td>
-                    <td>Dor no joelho</td>
-                    <td><span class="badge badge-success">Realizada</span></td>
-                  </tr>
+                <tbody id="tabela-agenda">
+                  <tr><td colspan="8" class="muted">Carregando...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
+
+          <div class="card" id="card-encaminhar" hidden>
+            <div class="card-header">
+              <div>
+                <h2>Encaminhar para especialista</h2>
+                <p>Só o clínico geral da consulta de rotina pode encaminhar.</p>
+              </div>
+            </div>
+
+            <form id="form-encaminhar">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="especialidade-encaminhar">Especialidade</label>
+                  <select id="especialidade-encaminhar" required>
+                    <option value="" selected disabled>Selecione a especialidade</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn">Encaminhar</button>
+                <button type="button" class="btn btn-outline" id="fechar-encaminhar">Fechar</button>
+              </div>
+            </form>
+          </div>
         </div>
       </main>
     </div>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const corStatus = {
+        AGENDADA: "badge-info",
+        CONFIRMADA: "badge-info",
+        EM_ATENDIMENTO: "badge-warning",
+        CONCLUIDA: "badge-success",
+        CANCELADA: "badge-danger",
+        NAO_COMPARECEU: "badge-neutral",
+        AGUARDANDO_AVALIACAO: "badge-warning",
+        CONCLUIDO: "badge-success",
+        AGENDADO: "badge-info",
+        EM_ANDAMENTO: "badge-warning",
+        CANCELADO: "badge-danger",
+      };
+      const textoStatus = {
+        AGENDADA: "Agendada",
+        CONFIRMADA: "Confirmada",
+        EM_ATENDIMENTO: "Em atendimento",
+        CONCLUIDA: "Concluída",
+        CANCELADA: "Cancelada",
+        NAO_COMPARECEU: "Não compareceu",
+        AGUARDANDO_AVALIACAO: "Aguardando avaliação",
+        CONCLUIDO: "Concluído",
+        AGENDADO: "Agendado",
+        EM_ANDAMENTO: "Em andamento",
+        CANCELADO: "Cancelado",
+      };
+      const textoTipo = {
+        ROTINA: "Rotina",
+        ESPECIALIZADA: "Especializada",
+        EMERGENCIA: "Emergência",
+        CIRURGIA: "Cirurgia",
+      };
+      const nomeEspecialidade = {
+        CARDIOLOGIA: "Cardiologia",
+        DERMATOLOGIA: "Dermatologia",
+        GINECOLOGIA: "Ginecologia",
+        NEUROLOGIA: "Neurologia",
+        ORTOPEDIA: "Ortopedia",
+        PEDIATRIA: "Pediatria",
+      };
+
+      function badge(status) {
+        return `<span class="badge ${corStatus[status] || "badge-neutral"}">${textoStatus[status] || api.escapar(status)}</span>`;
+      }
+
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-agenda");
+      const campoData = document.getElementById("data");
+      const cardEncaminhar = document.getElementById("card-encaminhar");
+      const formEncaminhar = document.getElementById("form-encaminhar");
+      const selectEncaminhar = document.getElementById("especialidade-encaminhar");
+      let consultaEncaminhar = null;
+
+      campoData.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().substring(0, 10);
+
+      function acoesDe(a) {
+        const consulta = a.tipo === "ROTINA" || a.tipo === "ESPECIALIZADA";
+        const botoes = [];
+        if (consulta && a.status === "CONFIRMADA") {
+          botoes.push(`<button type="button" class="btn btn-sm" onclick="iniciar(${a.id})">Iniciar</button>`);
+        }
+        if (consulta && a.status === "EM_ATENDIMENTO") {
+          botoes.push(`<button type="button" class="btn btn-sm" onclick="concluir(${a.id})">Concluir</button>`);
+        }
+        if (consulta && (a.status === "AGENDADA" || a.status === "CONFIRMADA")) {
+          botoes.push(`<button type="button" class="btn btn-outline btn-sm" onclick="naoCompareceu(${a.id})">Não compareceu</button>`);
+        }
+        if (a.tipo === "ROTINA" && (a.status === "EM_ATENDIMENTO" || a.status === "CONCLUIDA") && !a.encaminhamento) {
+          botoes.push(`<button type="button" class="btn btn-outline btn-sm" onclick="abrirEncaminhar(${a.id})">Encaminhar</button>`);
+        }
+        return botoes.length ? botoes.join(" ") : '<span class="muted">--</span>';
+      }
+
+      async function carregar() {
+        if (!campoData.value) return;
+        try {
+          const lista = await api.get("/consultas/agenda?data=" + campoData.value);
+
+          if (lista.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="8" class="muted">Nenhum atendimento neste dia.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = lista
+            .map((a) => {
+              let tipo = textoTipo[a.tipo] || "--";
+              if (a.especialidade) tipo += " · " + nomeEspecialidade[a.especialidade];
+              if (a.encaminhamento) tipo += " → " + nomeEspecialidade[a.encaminhamento];
+              return `<tr>
+                <td>${api.formatarData(a.data)}</td>
+                <td>${api.formatarHora(a.horario)}</td>
+                <td>${api.escapar(a.paciente.nome)}</td>
+                <td>${tipo}</td>
+                <td>${api.escapar(a.motivo) || "--"}</td>
+                <td>${a.observacoes ? api.escapar(a.observacoes) : '<span class="muted">--</span>'}</td>
+                <td>${badge(a.status)}</td>
+                <td><div style="display: flex; gap: 0.5rem; flex-wrap: wrap">${acoesDe(a)}</div></td>
+              </tr>`;
+            })
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="8" class="muted">Não foi possível carregar a agenda.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      async function mudar(id, acao, texto, corpo) {
+        try {
+          await api.put("/consultas/" + id + "/" + acao, corpo);
+          api.mostrarMensagem(mensagem, texto, "sucesso");
+          carregar();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      function iniciar(id) {
+        mudar(id, "iniciar", "Consulta iniciada.");
+      }
+
+      function concluir(id) {
+        const observacoes = prompt("Observações da consulta:");
+        if (observacoes === null) return;
+        mudar(id, "concluir", "Consulta concluída.", { observacoes: observacoes });
+      }
+
+      function naoCompareceu(id) {
+        if (!confirm("Registrar que o paciente não compareceu?")) return;
+        mudar(id, "nao-compareceu", "Falta registrada.");
+      }
+
+      function abrirEncaminhar(id) {
+        consultaEncaminhar = id;
+        formEncaminhar.reset();
+        cardEncaminhar.hidden = false;
+        cardEncaminhar.scrollIntoView({ behavior: "smooth" });
+      }
+
+      document.getElementById("fechar-encaminhar").addEventListener("click", () => {
+        cardEncaminhar.hidden = true;
+        consultaEncaminhar = null;
+      });
+
+      formEncaminhar.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        try {
+          await api.put("/consultas/" + consultaEncaminhar + "/encaminhar?especialidade=" + selectEncaminhar.value);
+          cardEncaminhar.hidden = true;
+          api.mostrarMensagem(mensagem, "Paciente encaminhado.", "sucesso");
+          carregar();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      async function carregarEspecialidades() {
+        try {
+          const especialidades = await api.get("/profissionais/especialidades");
+          especialidades.forEach((e) => selectEncaminhar.add(new Option(e.nome, e.valor)));
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      campoData.addEventListener("change", carregar);
+
+      carregarEspecialidades();
+      carregar();
+    </script>
   </body>
 </html>

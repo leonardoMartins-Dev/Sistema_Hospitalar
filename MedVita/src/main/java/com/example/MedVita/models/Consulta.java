@@ -1,11 +1,22 @@
 package com.example.MedVita.models;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.StatusConsulta;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 /*
  * =========================================================
  * CONSULTA  (classe ABSTRATA, filha de Atendimento)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: João Pedro (Sprint 2)
  *
  * O QUE MUDOU
@@ -66,3 +77,86 @@ package com.example.MedVita.models;
  *   Continua valendo: o ConsultaService confere antes de salvar, usando
  *   ocupaAgenda(), e o banco tem o índice único parcial como garantia final.
  */
+
+@Entity
+public abstract class Consulta extends Atendimento {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusConsulta status;
+
+    protected Consulta() {
+    }
+
+    protected Consulta(Paciente paciente, ProfissionalSaude profissional, LocalDate data,
+            LocalTime horario, String motivo) {
+        super(paciente, profissional, data, horario, motivo);
+        this.status = StatusConsulta.AGENDADA;
+    }
+
+    public void confirmar() {
+        mudarStatus(StatusConsulta.CONFIRMADA);
+    }
+
+    @Override
+    public void iniciar() {
+        verificarProfissional();
+        mudarStatus(StatusConsulta.EM_ATENDIMENTO);
+    }
+
+    @Override
+    public void concluir(String observacoes) {
+        if (observacoes == null || observacoes.isBlank()) {
+            throw new RegraNegocioException("Informe as observações da consulta");
+        }
+        mudarStatus(StatusConsulta.CONCLUIDA);
+        setObservacoes(observacoes);
+    }
+
+    @Override
+    public void cancelar() {
+        mudarStatus(StatusConsulta.CANCELADA);
+    }
+
+    public void registrarNaoComparecimento() {
+        mudarStatus(StatusConsulta.NAO_COMPARECEU);
+    }
+
+    @Override
+    public boolean ocupaAgenda() {
+        return status != StatusConsulta.CANCELADA;
+    }
+
+    @Override
+    public boolean isConcluido() {
+        return status == StatusConsulta.CONCLUIDA;
+    }
+
+    public Consulta reagendar(LocalDate novaData, LocalTime novoHorario) {
+        if (status != StatusConsulta.CANCELADA && status != StatusConsulta.NAO_COMPARECEU) {
+            throw new RegraNegocioException("Só consultas canceladas ou com falta podem ser reagendadas");
+        }
+        Consulta nova = copiar();
+        nova.setData(novaData);
+        nova.setHorario(novoHorario);
+        return nova;
+    }
+
+    protected abstract Consulta copiar();
+
+    protected void verificarMotivo() {
+        if (getMotivo() == null || getMotivo().isBlank()) {
+            throw new RegraNegocioException("Informe o motivo da consulta");
+        }
+    }
+
+    private void mudarStatus(StatusConsulta novo) {
+        if (!status.podeMudarPara(novo)) {
+            throw new RegraNegocioException("Uma consulta " + status.getDescricao().toLowerCase()
+                    + " não pode passar para " + novo.getDescricao().toLowerCase());
+        }
+        status = novo;
+    }
+
+    public StatusConsulta getStatus() { return status; }
+}
