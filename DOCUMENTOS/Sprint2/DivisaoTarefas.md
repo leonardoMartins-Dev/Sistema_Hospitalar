@@ -219,7 +219,7 @@ Não depende de ninguém. Os outros dependem dos seus contratos, então eles sae
 Passo a passo detalhado: [PassoAPasso-LeonardoMartins.md](PassoAPasso-LeonardoMartins.md).
 
 **Infraestrutura (fase 1, passou do Leonardo Gonzaga)**
-- [ ] `supabase/schema.sql` novo (seção 6), **rodado no Supabase**, e o banco funcionando para o grupo. Mandem o `.env` por mensagem privada, **nunca no git**.
+- [x] `supabase/schema.sql` novo (seção 6), **rodado no Supabase**, e o banco funcionando para o grupo. Mandem o `.env` por mensagem privada, **nunca no git**.
 - [x] `static/js/api.js` (seção 9)
 
 **Back (contratos, fase 1)**
@@ -317,7 +317,7 @@ Depende só dos contratos do Leonardo Martins. O histórico, feito por último, 
 9. Tentar remover um médico que já atendeu → erro. Remover um recém-cadastrado → ok.
 10. Histórico do paciente mostra só os atendimentos concluídos, de todas as modalidades, e as internações.
 
-> Os usuários de teste do `application.properties` (`paciente` e `medico`) **não existem no banco**, então rotas como `/consultas/minhas` não funcionam com eles. Com o banco no ar, cadastrem pacientes pelo `/register` e médicos pelo admin.
+> Os usuários de teste `paciente` e `medico` foram tirados do `application.properties` quando o banco passou a funcionar. Para testar, cadastrem pacientes pelo `/register` e médicos pelo admin (o admin continua no `application.properties`).
 
 ---
 
