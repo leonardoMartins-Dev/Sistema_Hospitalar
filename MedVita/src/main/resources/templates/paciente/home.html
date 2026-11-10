@@ -173,8 +173,8 @@
                 </svg>
               </div>
               <span class="stat-label">Próxima consulta</span>
-              <div class="stat-value">--</div>
-              <p class="stat-hint">Nenhuma consulta agendada no momento.</p>
+              <div class="stat-value" id="proxima-consulta-valor">--</div>
+              <p class="stat-hint" id="proxima-consulta-hint">Nenhuma consulta agendada no momento.</p>
             </div>
 
             <div class="stat-card">
@@ -190,8 +190,8 @@
                 </svg>
               </div>
               <span class="stat-label">Internações ativas</span>
-              <div class="stat-value">0</div>
-              <p class="stat-hint">Você não possui internações em aberto.</p>
+              <div class="stat-value" id="internacoes-ativas-valor">0</div>
+              <p class="stat-hint" id="internacoes-ativas-hint">Você não possui internações em aberto.</p>
             </div>
 
             <div class="stat-card">
@@ -204,8 +204,8 @@
                 </svg>
               </div>
               <span class="stat-label">Histórico</span>
-              <div class="stat-value">0</div>
-              <p class="stat-hint">Atendimentos registrados até agora.</p>
+              <div class="stat-value" id="historico-valor">0</div>
+              <p class="stat-hint" id="historico-hint">Atendimentos registrados até agora.</p>
             </div>
           </div>
 
@@ -294,5 +294,53 @@
         </div>
       </main>
     </div>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      // mostra a próxima consulta ou cirurgia
+      api.get('/consultas/minhas')
+        .then((atendimentos) => {
+          const agora = new Date();
+          const proximos = atendimentos.filter((atendimento) => {
+            const statusValido = ['AGENDADA', 'CONFIRMADA', 'AGENDADO'].includes(atendimento.status);
+            const dataHora = new Date(atendimento.data + 'T' + atendimento.horario);
+            return statusValido && dataHora >= agora;
+          }).sort((a, b) => new Date(a.data + 'T' + a.horario) - new Date(b.data + 'T' + b.horario));
+          if (proximos.length === 0) return;
+
+          const proxima = proximos[0];
+          const modalidades = {
+            ROTINA: 'Consulta de rotina',
+            ESPECIALIZADA: 'Consulta especializada',
+            EMERGENCIA: 'Emergência',
+            CIRURGIA: 'Cirurgia',
+          };
+          document.getElementById('proxima-consulta-valor').textContent =
+            api.formatarData(proxima.data) + ' ' + api.formatarHora(proxima.horario);
+          document.getElementById('proxima-consulta-hint').textContent =
+            modalidades[proxima.tipo] + (proxima.profissional && proxima.profissional.nome
+              ? ' com ' + proxima.profissional.nome
+              : '');
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+
+      // mostra as internações ativas
+      api.get('/internacoes/minhas')
+        .then((internacoes) => {
+          const ativas = internacoes.filter((internacao) => internacao.status === 'ATIVA');
+          document.getElementById('internacoes-ativas-valor').textContent = ativas.length;
+          if (ativas.length > 0) {
+            document.getElementById('internacoes-ativas-hint').textContent =
+              'Quarto ' + ativas[0].quarto.numero;
+          }
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+
+      // conta os atendimentos concluídos do histórico
+      api.get('/historico')
+        .then((historico) => {
+          document.getElementById('historico-valor').textContent = historico.atendimentos.length;
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+    </script>
   </body>
 </html>
