@@ -46,7 +46,9 @@ O administrador vê um resumo do hospital e gerencia o quadro de médicos.
 - **Senhas criptografadas** com BCrypt.
 - **Pacientes salvos no banco** (PostgreSQL no Supabase). Quem se cadastra continua existindo depois que o servidor reinicia.
 
-> **Em desenvolvimento:** por enquanto só o login usa o banco. Os números dos painéis (consultas, internações, quartos) ainda não vêm de dados reais. As classes do restante do backend já estão criadas, cada uma com a documentação do que vai fazer (veja [Estrutura do projeto](#estrutura-do-projeto)). A justificativa da escolha do banco está em [`DOCUMENTOS/BancoDeDados/`](DOCUMENTOS/BancoDeDados/JustificativaBancoRelacional.txt).
+- **Consultas, emergências, cirurgias, internações e quartos salvos no banco**, com as regras de negócio do enunciado (veja [Sprint 2](#sprint-2)). Os painéis iniciais de cada perfil mostram os números reais.
+
+A justificativa da escolha do banco está em [`DOCUMENTOS/BancoDeDados/`](DOCUMENTOS/BancoDeDados/JustificativaBancoRelacional.txt).
 
 ## Tecnologias
 
@@ -109,7 +111,7 @@ Depois, acesse <http://localhost:8080>.
 |---------------|---------------------------------------------------------------------------------------------|
 | Administrador | Fixo no [`application.properties`](MedVita/src/main/resources/application.properties) (`admin` / `1234`). Não fica no banco. |
 | Paciente      | Se cadastra pela página `/register`.                                                        |
-| Médico        | Cadastrado pelo administrador na página `/admin/medicos` (ainda a implementar).             |
+| Médico        | Cadastrado pelo administrador na página `/admin/medicos`, como clínico geral, especialista ou cirurgião. |
 
 ## Estrutura do projeto
 
@@ -136,10 +138,10 @@ Sistema_Hospitalar/
         │   └── resources/
         │       ├── static/        # CSS, imagens e js/api.js (chamadas da API pelas telas)
         │       └── templates/     # páginas HTML (login, paciente, medico, admin)
-        └── test/                  # testes automatizados dos services
+        └── test/                  # testes dos services (adiados: por enquanto só a documentação)
 ```
 
-Os arquivos marcados com `STATUS: A IMPLEMENTAR` ainda não têm código: cada um explica o que aquela parte vai fazer, quais regras de negócio do enunciado ela cobre e quais telas a usam.
+Cada classe começa com um comentário que explica o que ela faz, quais regras de negócio do enunciado cobre, quais telas a usam e quem é o responsável (linhas `STATUS` e `RESPONSÁVEL`).
 
 Os documentos do trabalho ficam em `DOCUMENTOS/`, cada tipo na sua própria pasta (ex.: `DOCUMENTOS/DiagramaUML/arquivo`).
 
@@ -149,6 +151,10 @@ Os documentos do trabalho ficam em `DOCUMENTOS/`, cada tipo na sua própria past
 - **Modalidades de atendimento:** `Atendimento` abstrata, com `ConsultaRotina` e `ConsultaEspecializada` (via `Consulta`), `AtendimentoEmergencia` e `ProcedimentoCirurgico`. As regras comuns ficam em `validar()` e cada modalidade implementa `validarRegrasDaModalidade()`.
 - **Situações da consulta:** enum `StatusConsulta` (agendada, confirmada, em atendimento, concluída, cancelada, não compareceu), com as mudanças permitidas em `podeMudarPara()`. Consulta cancelada é final: reagendar cria uma consulta nova.
 - **Consultas** (`/consultas`): agendar, confirmar, iniciar, concluir com observações, cancelar, registrar falta, reagendar e encaminhar para especialista. As rotas `iniciar`, `concluir` e `cancelar` valem para as 4 modalidades.
-- **Telas ligadas na API:** `paciente/agendar-consulta` (só mostra médicos livres no horário), `paciente/consultas` e `medico/consultas`.
+- **Emergência e cirurgia** (`/consultas/emergencias`, `/consultas/cirurgias`): a fila de emergência sai por prioridade (crítica primeiro) e depois por ordem de chegada, e o cirurgião não assume emergência. A cirurgia não pode ser concluída sem ter sido iniciada, e o cirurgião não pode ter dois procedimentos no mesmo horário.
+- **Quartos e internações** (`/quartos`, `/internacoes`): enum `TipoQuarto` com o limite de leitos de cada tipo (enfermaria de 2 a 6, apartamento de 1 a 2, UTI de 1 a 10). Internar ocupa um leito, a alta libera, e quarto lotado não recebe paciente.
+- **Histórico** (`/historico`): mostra só os atendimentos concluídos, das 4 modalidades, e as internações do paciente.
+- **Profissionais e pacientes** (`/profissionais`, `/pacientes`): o admin cadastra e remove médicos (quem já tem atendimento não pode ser removido), e o médico busca pacientes por nome, CPF ou e-mail.
+- **Telas ligadas na API:** todas as páginas do paciente, do médico e do admin, inclusive os painéis iniciais. Cada perfil só abre as próprias páginas.
 
 A divisão de tarefas e a lista completa de endpoints estão em [`DOCUMENTOS/Sprint2/DivisaoTarefas.md`](DOCUMENTOS/Sprint2/DivisaoTarefas.md).

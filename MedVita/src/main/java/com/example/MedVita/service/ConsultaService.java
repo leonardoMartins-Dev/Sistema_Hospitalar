@@ -21,6 +21,8 @@ import com.example.MedVita.models.enums.CategoriaProfissional;
 import com.example.MedVita.models.enums.Especialidade;
 import com.example.MedVita.models.enums.TipoAtendimento;
 import com.example.MedVita.repository.AtendimentoRepository;
+import com.example.MedVita.repository.ConsultaRepository;
+import com.example.MedVita.repository.ConsultaRotinaRepository;
 import com.example.MedVita.repository.PacienteRepository;
 import com.example.MedVita.repository.ProfissionalSaudeRepository;
 
@@ -41,6 +43,8 @@ import com.example.MedVita.repository.ProfissionalSaudeRepository;
  *
  * USA (só repositórios, para não depender do service de ninguém)
  *   AtendimentoRepository          (desta parte)
+ *   ConsultaRepository              (consultas)
+ *   ConsultaRotinaRepository        (consultas de rotina)
  *   PacienteRepository             (já existe) -> findById
  *   PacienteService.buscarPorEmail (já existe) -> paciente logado
  *   ProfissionalSaudeRepository    (Leonardo Martins) -> findById, findByEmail,
@@ -79,16 +83,14 @@ import com.example.MedVita.repository.ProfissionalSaudeRepository;
  *   cancelar(Long id)                      -> atendimento.cancelar()
  *
  * SÓ PARA CONSULTAS
- *   private Consulta comoConsulta(Atendimento a)
- *       if (!(a instanceof Consulta c)) lança RegraNegocioException(
- *           "Esta operação só vale para consultas");
- *   confirmar(Long id)          -> comoConsulta(a).confirmar()
- *   registrarFalta(Long id)     -> comoConsulta(a).registrarNaoComparecimento()
+ *   confirmar(Long id)          -> busca no ConsultaRepository e confirma
+ *   registrarFalta(Long id)     -> busca no ConsultaRepository e registra falta
  *   reagendar(Long id, LocalDate data, LocalTime horario)
- *       Consulta nova = comoConsulta(a).reagendar(data, horario);
+ *       busca no ConsultaRepository e cria a consulta reagendada;
  *       nova.validar(); confere a RN3; salva a NOVA. A antiga não muda.
  *   encaminhar(Long id, Especialidade especialidade, String emailMedicoLogado)
- *       - o atendimento tem que ser ConsultaRotina; senão RegraNegocioException
+ *       - busca no ConsultaRotinaRepository; se não for consulta de rotina,
+ *         lança RegraNegocioException
  *       - solicitante = profissionalSaudeRepository.findByEmail(emailMedicoLogado)
  *       - rotina.registrarEncaminhamento(especialidade, solicitante); salva
  *         (o model confere se o solicitante é o médico da consulta e se
@@ -124,13 +126,19 @@ import com.example.MedVita.repository.ProfissionalSaudeRepository;
 public class ConsultaService {
 
     private final AtendimentoRepository atendimentoRepository;
+    private final ConsultaRepository consultaRepository;
+    private final ConsultaRotinaRepository consultaRotinaRepository;
     private final PacienteRepository pacienteRepository;
     private final ProfissionalSaudeRepository profissionalSaudeRepository;
 
     public ConsultaService(AtendimentoRepository atendimentoRepository,
+            ConsultaRepository consultaRepository,
+            ConsultaRotinaRepository consultaRotinaRepository,
             PacienteRepository pacienteRepository,
             ProfissionalSaudeRepository profissionalSaudeRepository) {
         this.atendimentoRepository = atendimentoRepository;
+        this.consultaRepository = consultaRepository;
+        this.consultaRotinaRepository = consultaRotinaRepository;
         this.pacienteRepository = pacienteRepository;
         this.profissionalSaudeRepository = profissionalSaudeRepository;
     }
@@ -185,21 +193,21 @@ public class ConsultaService {
 
     @Transactional
     public Consulta confirmar(Long id) {
-        Consulta consulta = comoConsulta(buscarPorId(id));
+        Consulta consulta = buscarConsulta(id);
         consulta.confirmar();
         return atendimentoRepository.save(consulta);
     }
 
     @Transactional
     public Consulta registrarFalta(Long id) {
-        Consulta consulta = comoConsulta(buscarPorId(id));
+        Consulta consulta = buscarConsulta(id);
         consulta.registrarNaoComparecimento();
         return atendimentoRepository.save(consulta);
     }
 
     @Transactional
     public Consulta reagendar(Long id, LocalDate data, LocalTime horario) {
-        Consulta nova = comoConsulta(buscarPorId(id)).reagendar(data, horario);
+        Consulta nova = buscarConsulta(id).reagendar(data, horario);
         nova.validar();
         verificarHorarioLivre(nova.getProfissional().getId(), data, horario);
         return atendimentoRepository.save(nova);
@@ -207,9 +215,7 @@ public class ConsultaService {
 
     @Transactional
     public ConsultaRotina encaminhar(Long id, Especialidade especialidade, String emailMedicoLogado) {
-        if (!(buscarPorId(id) instanceof ConsultaRotina rotina)) {
-            throw new RegraNegocioException("Só consultas de rotina podem ter encaminhamento");
-        }
+        ConsultaRotina rotina = buscarConsultaRotina(id);
         ProfissionalSaude solicitante = profissionalSaudeRepository.findByEmail(emailMedicoLogado)
                 .orElseThrow(() -> new RegraNegocioException("Profissional logado não encontrado"));
         rotina.registrarEncaminhamento(especialidade, solicitante);
@@ -254,11 +260,24 @@ public class ConsultaService {
                 && atendimento.getPaciente().getEmail().equalsIgnoreCase(email);
     }
 
-    private Consulta comoConsulta(Atendimento atendimento) {
-        if (!(atendimento instanceof Consulta consulta)) {
-            throw new RegraNegocioException("Esta operação só vale para consultas");
-        }
-        return consulta;
+    private Consulta buscarConsulta(Long id) {
+        return consultaRepository.findById(id)
+                .orElseThrow(() -> {
+                    if (!atendimentoRepository.existsById(id)) {
+                        return new RecursoNaoEncontradoException("Atendimento " + id + " não encontrado");
+                    }
+                    return new RegraNegocioException("Esta operação só vale para consultas");
+                });
+    }
+
+    private ConsultaRotina buscarConsultaRotina(Long id) {
+        return consultaRotinaRepository.findById(id)
+                .orElseThrow(() -> {
+                    if (!atendimentoRepository.existsById(id)) {
+                        return new RecursoNaoEncontradoException("Atendimento " + id + " não encontrado");
+                    }
+                    return new RegraNegocioException("Só consultas de rotina podem ter encaminhamento");
+                });
     }
 
     private void verificarHorarioLivre(Long profissionalId, LocalDate data, LocalTime horario) {

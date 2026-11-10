@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
 
     // JSON com valor inválido (ex.: "tipo": "XPTO") ou parâmetro inválido (?categoria=XPTO)
     @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class })
-    public ResponseEntity<Object> handleDadosInvalidos(Exception ex) {
+    public ResponseEntity<Object> handleJsonInvalido(Exception ex) {
         log.warn("Dados inválidos: {}", ex.getMessage());
         return resposta(HttpStatus.BAD_REQUEST, "Dados inválidos na requisição.");
     }

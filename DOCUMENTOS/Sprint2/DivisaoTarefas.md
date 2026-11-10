@@ -354,11 +354,11 @@ As telas hoje são HTML estático, sem JavaScript. Para ligar cada uma na API:
 
 | Entrega | Onde está | Status |
 |---|---|---|
-| 1. Diagrama de classes atualizado | `DOCUMENTOS/DiagramaUML/` (domínio e camadas) | feito; conferir com o código na fase 4 |
-| 2. Classes de domínio com atributos, métodos e regras | `models/` e `models/enums/` | a fazer (seção 7) |
-| 3. Endpoints `/pacientes`, `/profissionais`, `/consultas`, `/internacoes`, `/quartos` | `controller/` | a fazer (seção 4) |
-| 4. Regras de categorias de profissionais | `podeRealizar()` e `podeEncaminhar()` nas 3 subclasses, filtro por especialidade | a fazer |
-| 4. Regras das modalidades de atendimento | `validarRegrasDaModalidade()` nas 4 modalidades | a fazer |
-| 4. Situações das consultas | `StatusConsulta.podeMudarPara()` + `Consulta.mudarStatus()` | a fazer |
-| 4. Procedimentos cirúrgicos | `ProcedimentoCirurgico` + `StatusProcedimento` (não conclui sem iniciar) | a fazer |
-| 4. Tipos de quartos | `TipoQuarto.aceitaCapacidade()` + `Quarto.validar()` | a fazer |
+| 1. Diagrama de classes atualizado | `DOCUMENTOS/DiagramaUML/` (domínio e camadas) | feito; métodos e atributos do diagrama de domínio conferidos com o código |
+| 2. Classes de domínio com atributos, métodos e regras | `models/` e `models/enums/` | feito |
+| 3. Endpoints `/pacientes`, `/profissionais`, `/consultas`, `/internacoes`, `/quartos` | `controller/` | feito (todas as rotas da seção 4) |
+| 4. Regras de categorias de profissionais | `podeRealizar()` e `podeEncaminhar()` nas 3 subclasses, filtro por especialidade | feito |
+| 4. Regras das modalidades de atendimento | `validarRegrasDaModalidade()` nas 4 modalidades | feito |
+| 4. Situações das consultas | `StatusConsulta.podeMudarPara()` + `Consulta.mudarStatus()` | feito |
+| 4. Procedimentos cirúrgicos | `ProcedimentoCirurgico` + `StatusProcedimento` (não conclui sem iniciar) | feito |
+| 4. Tipos de quartos | `TipoQuarto.aceitaCapacidade()` + `Quarto.validar()` | feito |

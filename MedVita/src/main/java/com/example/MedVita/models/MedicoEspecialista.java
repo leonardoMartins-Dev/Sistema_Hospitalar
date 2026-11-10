@@ -51,7 +51,7 @@ public class MedicoEspecialista extends ProfissionalSaude {
     public boolean podeEncaminhar(){
         return false;
     }
-    public Especialidade gEspecialidade(){
+    public Especialidade getEspecialidade(){
         return especialidade;
     }
 }

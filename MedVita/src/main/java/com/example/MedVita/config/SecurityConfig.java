@@ -26,6 +26,7 @@ import com.example.MedVita.service.RecaptchaService;
  *      /resetpassword, /error e os arquivos estáticos em /css e /images.
  *    - /admin/** só para quem tem o papel ADMIN (ROLE_ADMIN).
  *    - /medico/** só para quem tem o papel MEDICO (ROLE_MEDICO).
+ *    - /home e /paciente/** só para quem tem o papel USER (ROLE_USER), o paciente.
  *    - Qualquer outra URL (ex.: /home) exige estar logado.
  *    - Coloca o RecaptchaFilter ANTES do filtro de login do Spring, para
  *      barrar o POST /login quando o captcha não foi resolvido.
@@ -93,6 +94,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/js/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/medico/**").hasRole("MEDICO")
+                .requestMatchers("/home", "/paciente/**").hasRole("USER")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(recaptchaFilter, UsernamePasswordAuthenticationFilter.class)

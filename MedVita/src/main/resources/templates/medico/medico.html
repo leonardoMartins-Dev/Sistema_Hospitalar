@@ -102,22 +102,22 @@
             <div class="stat-card">
               <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/></svg></div>
               <span class="stat-label">Consultas hoje</span>
-              <div class="stat-value">0</div>
-              <p class="stat-hint">Nenhuma consulta agendada para hoje.</p>
+              <div class="stat-value" id="consultas-hoje-valor">0</div>
+              <p class="stat-hint" id="consultas-hoje-hint">Nenhuma consulta agendada para hoje.</p>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M2 20v-9"/><path d="M2 15h20"/><path d="M2 20h20"/><path d="M22 20v-5.5a1.5 1.5 0 0 0-1.5-1.5H11v2"/><rect x="4" y="10" width="5" height="3.5" rx="1"/></svg></div>
               <span class="stat-label">Pacientes internados</span>
-              <div class="stat-value">0</div>
-              <p class="stat-hint">Nenhuma internação em andamento.</p>
+              <div class="stat-value" id="pacientes-internados-valor">0</div>
+              <p class="stat-hint" id="pacientes-internados-hint">Nenhuma internação em andamento.</p>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="18" rx="1"/><circle cx="13.5" cy="12" r="1"/><path d="M17 21h4"/><path d="M3 21h2"/></svg></div>
               <span class="stat-label">Quartos disponíveis</span>
-              <div class="stat-value">--</div>
-              <p class="stat-hint">Consulte a disponibilidade de quartos.</p>
+              <div class="stat-value" id="quartos-disponiveis-valor">--</div>
+              <p class="stat-hint" id="quartos-disponiveis-hint">Consulte a disponibilidade de quartos.</p>
             </div>
           </div>
 
@@ -158,5 +158,53 @@
         </div>
       </main>
     </div>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      // conta os atendimentos de hoje e indica o próximo horário
+      api.get('/consultas/agenda')
+        .then((atendimentos) => {
+          const cancelados = ['CANCELADA', 'CANCELADO', 'NAO_COMPARECEU'];
+          const validos = atendimentos.filter((atendimento) => !cancelados.includes(atendimento.status));
+          document.getElementById('consultas-hoje-valor').textContent = validos.length;
+
+          const agora = new Date();
+          const pendentes = validos.filter((atendimento) => {
+            const statusPendente = ['AGENDADA', 'CONFIRMADA', 'AGENDADO'].includes(atendimento.status);
+            return statusPendente && new Date(atendimento.data + 'T' + atendimento.horario) >= agora;
+          }).sort((a, b) => new Date(a.data + 'T' + a.horario) - new Date(b.data + 'T' + b.horario));
+          const hint = document.getElementById('consultas-hoje-hint');
+          if (pendentes.length > 0) {
+            hint.textContent = 'Próximo às ' + api.formatarHora(pendentes[0].horario);
+          } else if (validos.length > 0) {
+            hint.textContent = 'Nenhum atendimento pendente hoje.';
+          }
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+
+      // conta as internações ativas do hospital
+      api.get('/internacoes?status=ATIVA')
+        .then((internacoes) => {
+          document.getElementById('pacientes-internados-valor').textContent = internacoes.length;
+          if (internacoes.length > 0) {
+            document.getElementById('pacientes-internados-hint').textContent =
+              'Internações em andamento no hospital.';
+          }
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+
+      // soma os leitos livres nos quartos disponíveis
+      api.get('/quartos?disponivel=true')
+        .then((quartos) => {
+          document.getElementById('quartos-disponiveis-valor').textContent = quartos.length;
+          const hint = document.getElementById('quartos-disponiveis-hint');
+          if (quartos.length > 0) {
+            const leitosLivres = quartos.reduce((total, quarto) => total + quarto.leitosLivres, 0);
+            hint.textContent = leitosLivres + ' leito(s) livre(s)';
+          } else {
+            hint.textContent = 'Nenhum quarto com vaga no momento.';
+          }
+        })
+        .catch(() => {}); // se falhar, o card continua com o texto padrão
+    </script>
   </body>
 </html>
