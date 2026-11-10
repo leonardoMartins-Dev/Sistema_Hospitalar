@@ -1,0 +1,72 @@
+# =========================================================
+# MEDVITA NO DOCKER (desenvolvimento)
+# Responsável: Leonardo Martins
+# =========================================================
+#
+# Na pasta MedVita/:
+#   docker compose up --build     sobe tudo (use de novo depois de mudar o código)
+#   docker compose down           para os containers (os dados do banco ficam)
+#   docker compose down -v        para e APAGA o banco local
+#
+# Depois acesse http://localhost:8080 (admin / 1234).
+#
+# Sobe dois containers:
+#   db  -> um PostgreSQL só seu, criado com o supabase/schema.sql
+#   app -> o MedVita, compilado pelo Dockerfile
+#
+# Os valores ${...} abaixo vêm do MedVita/.env (o Docker Compose lê esse
+# arquivo sozinho). O que estiver vazio ou faltando no .env usa o valor que
+# vem depois do ":-". Sem .env nenhum, tudo funciona com esses valores.
+
+services:
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: medvita
+      POSTGRES_USER: medvita
+      POSTGRES_PASSWORD: medvita
+    ports:
+      # Para abrir o banco no DBeaver, pgAdmin etc.:
+      # localhost:5433, banco medvita, usuário medvita, senha medvita
+      - "127.0.0.1:5433:5432"
+    volumes:
+      # Os dados ficam neste volume e continuam lá depois do "docker compose down"
+      - medvita-db:/var/lib/postgresql/data
+      # O schema.sql roda só na PRIMEIRA vez, com o volume ainda vazio.
+      # Mudou o schema.sql? Rode "docker compose down -v" para recriar o banco.
+      - ./supabase/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      # -h 127.0.0.1: só fica "pronto" quando o banco aceita conexões pela
+      # rede, ou seja, depois que o schema.sql terminou de rodar
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U medvita -d medvita"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # BANCO: com SUPABASE_DB_* vazias no .env, usa o Postgres do container "db".
+      # Preenchidas, usa o Supabase (o schema.sql NÃO é rodado lá pelo Docker).
+      SUPABASE_DB_URL: ${SUPABASE_DB_URL:-jdbc:postgresql://db:5432/medvita}
+      SUPABASE_DB_USER: ${SUPABASE_DB_USER:-medvita}
+      SUPABASE_DB_PASSWORD: ${SUPABASE_DB_PASSWORD:-medvita}
+
+      # reCAPTCHA: sem chaves no .env, usa as chaves de TESTE do Google. O
+      # captcha sempre passa e mostra um aviso vermelho "somente para testes".
+      # https://developers.google.com/recaptcha/docs/faq
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:-6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe}
+
+      # GMAIL: só a recuperação de senha usa. Vazio, o resto do site funciona.
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+
+volumes:
+  medvita-db:
