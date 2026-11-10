@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- token CSRF para os POST/PUT da API (lido pelo api.js) -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <title>MEDVITA - Histórico Médico</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -76,16 +80,16 @@
             <h1>Histórico Médico</h1>
             <p>Consulte o histórico completo dos seus atendimentos.</p>
           </div>
-
-          
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
           <div class="card">
             <div class="card-header">
               <div>
-                <h2>Consultas realizadas</h2>
-                <p>Atendimentos concluídos com profissionais de saúde.</p>
+                <h2>Atendimentos realizados</h2>
+                <p>Consultas, emergências e cirurgias concluídas.</p>
               </div>
             </div>
 
@@ -94,30 +98,17 @@
                 <thead>
                   <tr>
                     <th>Data</th>
+                    <th>Tipo de atendimento</th>
                     <th>Profissional</th>
-                    <th>Especialidade</th>
+                    <th>Área</th>
+                    <th>Motivo</th>
                     <th>Observações médicas</th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="tabela-atendimentos">
                   <tr>
-                    <td>10/08/2026</td>
-                    <td>Dra. Camila Souza</td>
-                    <td>Clínica Geral</td>
-                    <td class="muted">
-                      Paciente sem alterações relevantes. Retorno em 12
-                      meses.
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>02/07/2026</td>
-                    <td>Dr. André Lima</td>
-                    <td>Ortopedia</td>
-                    <td class="muted">
-                      Encaminhado para exame de imagem no joelho direito.
-                    </td>
+                    <td colspan="6" class="muted">Carregando...</td>
                   </tr>
                 </tbody>
               </table>
@@ -128,7 +119,7 @@
             <div class="card-header">
               <div>
                 <h2>Internações realizadas</h2>
-                <p>Períodos em que o paciente esteve internado.</p>
+                <p>Períodos em que você esteve internado.</p>
               </div>
             </div>
 
@@ -139,19 +130,14 @@
                     <th>Entrada</th>
                     <th>Alta</th>
                     <th>Quarto</th>
+                    <th>Profissional responsável</th>
                     <th>Observações</th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="tabela-internacoes">
                   <tr>
-                    <td>15/03/2025</td>
-                    <td>19/03/2025</td>
-                    <td>204 (2º andar)</td>
-                    <td class="muted">
-                      Internação para observação pós-cirúrgica. Alta sem
-                      intercorrências.
-                    </td>
+                    <td colspan="5" class="muted">Carregando...</td>
                   </tr>
                 </tbody>
               </table>
@@ -160,5 +146,90 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const tabelaAtendimentos = document.getElementById("tabela-atendimentos");
+      const tabelaInternacoes = document.getElementById("tabela-internacoes");
+
+      // "tipo" vem de Atendimento.getTipo() (mesmos nomes do enum TipoAtendimento)
+      const textoTipo = {
+        ROTINA: "Consulta de rotina",
+        ESPECIALIZADA: "Consulta especializada",
+        EMERGENCIA: "Atendimento de emergência",
+        CIRURGIA: "Procedimento cirúrgico",
+      };
+      const corTipo = {
+        ROTINA: "badge-info",
+        ESPECIALIZADA: "badge-neutral",
+        EMERGENCIA: "badge-danger",
+        CIRURGIA: "badge-warning",
+      };
+
+      function texto(valor) {
+        return valor ? api.escapar(valor) : "--";
+      }
+
+      function mostrarAtendimentos(atendimentos) {
+        if (atendimentos.length === 0) {
+          tabelaAtendimentos.innerHTML = '<tr><td colspan="6" class="muted">Nenhum atendimento concluído ainda.</td></tr>';
+          return;
+        }
+
+        tabelaAtendimentos.innerHTML = atendimentos
+          .map((a) => {
+            // na cirurgia o motivo é a descrição do procedimento e as observações são as pós-operatórias
+            const motivo = a.descricaoProcedimento || a.motivo;
+            const observacoes = a.observacoes || a.observacoesPosOperatorias;
+            return `<tr>
+              <td>${api.formatarData(a.data)} ${api.formatarHora(a.horario)}</td>
+              <td><span class="badge ${corTipo[a.tipo] || "badge-neutral"}">${textoTipo[a.tipo] || a.tipo}</span></td>
+              <td>${a.profissional ? api.escapar(a.profissional.nome) : "--"}</td>
+              <td>${a.profissional ? api.escapar(a.profissional.areaAtuacao) : "--"}</td>
+              <td>${texto(motivo)}</td>
+              <td class="muted" style="white-space: pre-line">${texto(observacoes)}</td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      function mostrarInternacoes(internacoes) {
+        if (internacoes.length === 0) {
+          tabelaInternacoes.innerHTML = '<tr><td colspan="5" class="muted">Nenhuma internação registrada.</td></tr>';
+          return;
+        }
+
+        tabelaInternacoes.innerHTML = internacoes
+          .map((i) => {
+            const andar = i.quarto.andar === 0 ? "térreo" : i.quarto.andar + "º andar";
+            const alta = i.status === "ATIVA" ? '<span class="badge badge-warning">Internado</span>' : api.formatarData(i.dataEfetivaAlta);
+            return `<tr>
+              <td>${api.formatarData(i.dataEntrada)}</td>
+              <td>${alta}</td>
+              <td>${api.escapar(i.quarto.numero)} (${andar})</td>
+              <td>${api.escapar(i.profissional.nome)}</td>
+              <td class="muted" style="white-space: pre-line">${texto(i.observacoes)}</td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      // GET /historico (histórico do paciente logado)
+      async function carregarHistorico() {
+        try {
+          const historico = await api.get("/historico");
+          mostrarAtendimentos(historico.atendimentos);
+          mostrarInternacoes(historico.internacoes);
+        } catch (erro) {
+          const falha = '<td class="muted">Não foi possível carregar o histórico.</td>';
+          tabelaAtendimentos.innerHTML = "<tr>" + falha.replace("<td", '<td colspan="6"') + "</tr>";
+          tabelaInternacoes.innerHTML = "<tr>" + falha.replace("<td", '<td colspan="5"') + "</tr>";
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      carregarHistorico();
+    </script>
   </body>
 </html>

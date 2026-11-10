@@ -1,11 +1,13 @@
 package com.example.MedVita.models;
 
+import java.util.List;
+
 /*
  * =========================================================
  * HISTÓRICO MÉDICO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
@@ -39,3 +41,20 @@ package com.example.MedVita.models;
  * QUEM MONTA: HistoricoMedicoService.
  * TELA: paciente/historico (e o médico, ao consultar um paciente)
  */
+
+public class HistoricoMedico {
+
+    private final Paciente paciente;
+    private final List<Atendimento> atendimentos;   // só os concluídos, do mais recente ao mais antigo
+    private final List<Internacao> internacoes;     // todas, da mais recente à mais antiga
+
+    public HistoricoMedico(Paciente paciente, List<Atendimento> atendimentos, List<Internacao> internacoes) {
+        this.paciente = paciente;
+        this.atendimentos = List.copyOf(atendimentos);
+        this.internacoes = List.copyOf(internacoes);
+    }
+
+    public Paciente getPaciente() { return paciente; }
+    public List<Atendimento> getAtendimentos() { return atendimentos; }
+    public List<Internacao> getInternacoes() { return internacoes; }
+}

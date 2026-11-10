@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- token CSRF para os POST/PUT da API (lido pelo api.js) -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <title>MEDVITA - Internações</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -81,49 +85,105 @@
             <h1>Internações</h1>
             <p>Gerencie internações, altas e observações médicas.</p>
           </div>
-
-          <button type="button" class="btn"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg> Registrar Internação</button>
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Registrar internação</h2>
+                <p>Só aparecem os quartos com leito livre.</p>
+              </div>
+            </div>
+
+            <form id="form-internacao">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="paciente">Paciente</label>
+                  <select id="paciente" name="paciente" required>
+                    <option value="" selected disabled>Selecione o paciente</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="profissional">Profissional responsável</label>
+                  <select id="profissional" name="profissional" required>
+                    <option value="" selected disabled>Selecione o profissional</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="quarto">Quarto</label>
+                  <select id="quarto" name="quarto" required>
+                    <option value="" selected disabled>Selecione o quarto</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="dataEntrada">Data de entrada</label>
+                  <input type="date" id="dataEntrada" name="dataEntrada" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="dataPrevistaAlta">Previsão de alta</label>
+                  <input type="date" id="dataPrevistaAlta" name="dataPrevistaAlta" />
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="observacoes">Observações</label>
+                  <textarea id="observacoes" name="observacoes" placeholder="Ex.: Pós-operatório, observação por 48h"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                  Registrar Internação
+                </button>
+              </div>
+            </form>
+          </div>
+
           <div class="card">
             <div class="card-header">
               <div>
                 <h2>Internações</h2>
-                <p>Pacientes internados e histórico de internações.</p>
+                <p>Pacientes internados agora e histórico de internações.</p>
               </div>
             </div>
 
-            <div class="table-wrapper">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="filtro-status">Mostrar</label>
+                <select id="filtro-status">
+                  <option value="ATIVA" selected>Internados agora</option>
+                  <option value="ALTA">Com alta</option>
+                  <option value="">Todas</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="margin-top: 1.4rem">
               <table class="table">
                 <thead>
                   <tr>
                     <th>Paciente</th>
                     <th>Quarto</th>
+                    <th>Responsável</th>
                     <th>Entrada</th>
                     <th>Previsão de alta</th>
                     <th>Alta efetiva</th>
-                    <th>Status</th>
+                    <th>Observações</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="tabela-internacoes">
                   <tr>
-                    <td>João Pedro Santos</td>
-                    <td>101 (1º andar)</td>
-                    <td>20/09/2026</td>
-                    <td>27/09/2026</td>
-                    <td class="muted">--</td>
-                    <td><span class="badge badge-warning">Internado</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>Mariana Costa</td>
-                    <td>204 (2º andar)</td>
-                    <td>15/03/2025</td>
-                    <td>20/03/2025</td>
-                    <td>19/03/2025</td>
-                    <td><span class="badge badge-success">Alta</span></td>
+                    <td colspan="9" class="muted">Carregando...</td>
                   </tr>
                 </tbody>
               </table>
@@ -132,5 +192,148 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-internacoes");
+      const filtroStatus = document.getElementById("filtro-status");
+      const selectQuarto = document.getElementById("quarto");
+
+      const textoStatus = { ATIVA: "Internado", ALTA: "Alta" };
+      const corStatus = { ATIVA: "badge-warning", ALTA: "badge-success" };
+
+      // data de hoje no fuso do navegador, no formato do <input type="date">
+      function hoje() {
+        const d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      }
+
+      function descreverQuarto(q) {
+        return q.numero + " (" + (q.andar === 0 ? "térreo" : q.andar + "º andar") + ")";
+      }
+
+      // PACIENTES E PROFISSIONAIS (carregados uma vez)
+      async function carregarSelects() {
+        try {
+          const pacientes = await api.get("/pacientes");
+          const selectPaciente = document.getElementById("paciente");
+          pacientes.forEach((p) => selectPaciente.add(new Option(p.nome + " (CPF " + p.cpf + ")", p.id)));
+
+          const profissionais = await api.get("/profissionais");
+          const selectProfissional = document.getElementById("profissional");
+          profissionais.forEach((m) => selectProfissional.add(new Option(m.nome + " · " + m.areaAtuacao, m.id)));
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // QUARTOS COM VAGA (recarregados depois de internar e de dar alta)
+      async function carregarQuartos() {
+        try {
+          const quartos = await api.get("/quartos?disponivel=true");
+          selectQuarto.innerHTML = '<option value="" selected disabled>Selecione o quarto</option>';
+          if (quartos.length === 0) {
+            selectQuarto.add(new Option("Nenhum quarto com vaga", ""));
+            selectQuarto.options[1].disabled = true;
+          }
+          quartos.forEach((q) => {
+            const livres = q.leitosLivres + (q.leitosLivres === 1 ? " leito livre" : " leitos livres");
+            selectQuarto.add(new Option(descreverQuarto(q) + " · " + livres, q.id));
+          });
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // MONTA A TABELA
+      async function carregarInternacoes() {
+        const url = "/internacoes" + (filtroStatus.value ? "?status=" + filtroStatus.value : "");
+
+        try {
+          const lista = await api.get(url);
+
+          if (lista.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="9" class="muted">Nenhuma internação encontrada.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = lista
+            .map((i) => {
+              const acoes =
+                i.status === "ATIVA"
+                  ? `<button type="button" class="btn btn-outline btn-sm" onclick="darAlta(${i.id})">Dar alta</button>`
+                  : '<span class="muted">--</span>';
+
+              return `<tr>
+                <td>${api.escapar(i.paciente.nome)}</td>
+                <td>${api.escapar(descreverQuarto(i.quarto))}</td>
+                <td>${api.escapar(i.profissional.nome)}</td>
+                <td>${api.formatarData(i.dataEntrada)}</td>
+                <td${i.dataPrevistaAlta ? "" : ' class="muted"'}>${api.formatarData(i.dataPrevistaAlta)}</td>
+                <td${i.dataEfetivaAlta ? "" : ' class="muted"'}>${api.formatarData(i.dataEfetivaAlta)}</td>
+                <td class="muted" style="white-space: pre-line">${api.escapar(i.observacoes) || "--"}</td>
+                <td><span class="badge ${corStatus[i.status]}">${textoStatus[i.status]}</span></td>
+                <td class="actions">${acoes}</td>
+              </tr>`;
+            })
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="9" class="muted">Não foi possível carregar as internações.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // REGISTRAR INTERNAÇÃO (POST /internacoes)
+      document.getElementById("form-internacao").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const previsao = document.getElementById("dataPrevistaAlta").value;
+
+        try {
+          await api.post("/internacoes", {
+            pacienteId: Number(document.getElementById("paciente").value),
+            profissionalId: Number(document.getElementById("profissional").value),
+            quartoId: Number(selectQuarto.value),
+            dataEntrada: document.getElementById("dataEntrada").value,
+            dataPrevistaAlta: previsao || null,
+            observacoes: document.getElementById("observacoes").value.trim() || null,
+          });
+
+          evento.target.reset();
+          document.getElementById("dataEntrada").value = hoje();
+          api.mostrarMensagem(mensagem, "Internação registrada.", "sucesso");
+          filtroStatus.value = "ATIVA";
+          carregarQuartos();
+          carregarInternacoes();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      // DAR ALTA (PUT /internacoes/{id}/alta), com a data de hoje
+      async function darAlta(id) {
+        const observacoes = prompt("Observações da alta (opcional):");
+        if (observacoes === null) return; // cancelou
+
+        try {
+          await api.put("/internacoes/" + id + "/alta", {
+            dataEfetivaAlta: hoje(),
+            observacoes: observacoes.trim() || null,
+          });
+          api.mostrarMensagem(mensagem, "Alta registrada. O leito foi liberado.", "sucesso");
+          carregarQuartos();
+          carregarInternacoes();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      filtroStatus.addEventListener("change", carregarInternacoes);
+
+      document.getElementById("dataEntrada").value = hoje();
+      carregarSelects();
+      carregarQuartos();
+      carregarInternacoes();
+    </script>
   </body>
 </html>

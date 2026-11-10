@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- token CSRF para os POST/PUT da API (lido pelo api.js) -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <title>MEDVITA - Minhas Internações</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -76,11 +80,11 @@
             <h1>Minhas Internações</h1>
             <p>Acompanhe suas internações, quarto e datas de alta.</p>
           </div>
-
-          
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
           <div class="card">
             <div class="card-header">
               <div>
@@ -98,18 +102,14 @@
                     <th>Alta efetiva</th>
                     <th>Quarto</th>
                     <th>Profissional responsável</th>
+                    <th>Observações</th>
                     <th>Status</th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="tabela-internacoes">
                   <tr>
-                    <td>15/03/2025</td>
-                    <td>20/03/2025</td>
-                    <td>19/03/2025</td>
-                    <td>204 (2º andar)</td>
-                    <td>Dr. André Lima</td>
-                    <td><span class="badge badge-success">Alta</span></td>
+                    <td colspan="7" class="muted">Carregando...</td>
                   </tr>
                 </tbody>
               </table>
@@ -118,5 +118,46 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-internacoes");
+
+      const textoStatus = { ATIVA: "Internado", ALTA: "Alta" };
+      const corStatus = { ATIVA: "badge-warning", ALTA: "badge-success" };
+
+      // GET /internacoes/minhas (internações do paciente logado)
+      async function carregarInternacoes() {
+        try {
+          const lista = await api.get("/internacoes/minhas");
+
+          if (lista.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="7" class="muted">Você não tem internações registradas.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = lista
+            .map((i) => {
+              const andar = i.quarto.andar === 0 ? "térreo" : i.quarto.andar + "º andar";
+              return `<tr>
+                <td>${api.formatarData(i.dataEntrada)}</td>
+                <td${i.dataPrevistaAlta ? "" : ' class="muted"'}>${api.formatarData(i.dataPrevistaAlta)}</td>
+                <td${i.dataEfetivaAlta ? "" : ' class="muted"'}>${api.formatarData(i.dataEfetivaAlta)}</td>
+                <td>${api.escapar(i.quarto.numero)} (${andar})</td>
+                <td>${api.escapar(i.profissional.nome)}</td>
+                <td class="muted" style="white-space: pre-line">${api.escapar(i.observacoes) || "--"}</td>
+                <td><span class="badge ${corStatus[i.status]}">${textoStatus[i.status]}</span></td>
+              </tr>`;
+            })
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="7" class="muted">Não foi possível carregar as internações.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      carregarInternacoes();
+    </script>
   </body>
 </html>

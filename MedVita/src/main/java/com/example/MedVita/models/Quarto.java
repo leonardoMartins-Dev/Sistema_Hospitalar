@@ -1,11 +1,24 @@
 package com.example.MedVita.models;
 
+import com.example.MedVita.exception.RegraNegocioException;
+import com.example.MedVita.models.enums.TipoQuarto;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 /*
  * =========================================================
  * QUARTO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
@@ -65,3 +78,99 @@ package com.example.MedVita.models;
  *
  * TELA: medico/quartos (coluna Tipo e filtro por tipo)
  */
+
+@Entity
+@Table(name = "quartos")
+public class Quarto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String numero;
+
+    @Column(nullable = false)
+    private int andar;
+
+    @Column(name = "capacidade_maxima", nullable = false)
+    private int capacidadeMaxima;
+
+    // Só muda por ocupar()/liberar(). READ_ONLY: o que vier no JSON do POST é ignorado.
+    @Column(name = "ocupacao_atual", nullable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private int ocupacaoAtual;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoQuarto tipo;
+
+    // JPA e Jackson (POST /quartos) precisam do construtor vazio
+    protected Quarto() {
+    }
+
+    public Quarto(String numero, int andar, int capacidadeMaxima, TipoQuarto tipo) {
+        this.numero = numero;
+        this.andar = andar;
+        this.capacidadeMaxima = capacidadeMaxima;
+        this.tipo = tipo;
+        this.ocupacaoAtual = 0;
+    }
+
+    // REGRAS DO CADASTRO (os limites de leitos ficam no enum TipoQuarto)
+    public void validar() {
+        if (numero == null || numero.isBlank()) {
+            throw new RegraNegocioException("Informe o número do quarto");
+        }
+        if (tipo == null) {
+            throw new RegraNegocioException("Informe o tipo do quarto");
+        }
+        if (!tipo.aceitaCapacidade(capacidadeMaxima)) {
+            throw new RegraNegocioException("Quarto do tipo " + tipo.getDescricao() + " deve ter de "
+                    + tipo.getMinLeitos() + " a " + tipo.getMaxLeitos() + " leitos");
+        }
+    }
+
+    public boolean temVaga() {
+        return ocupacaoAtual < capacidadeMaxima;
+    }
+
+    public int getLeitosLivres() {
+        return capacidadeMaxima - ocupacaoAtual;
+    }
+
+    // calculada, não é gravada no banco
+    public String getSituacao() {
+        return temVaga() ? "Disponível" : "Ocupado";
+    }
+
+    // OCUPA UM LEITO (RN4 e RN5). Quem chama: InternacaoService.internar
+    public void ocupar() {
+        if (!temVaga()) {
+            throw new RegraNegocioException("Quarto " + numero + " está lotado");
+        }
+        ocupacaoAtual++;
+    }
+
+    // LIBERA UM LEITO. Quem chama: InternacaoService.darAlta
+    public void liberar() {
+        if (ocupacaoAtual == 0) {
+            throw new RegraNegocioException("Quarto " + numero + " já está vazio");
+        }
+        ocupacaoAtual--;
+    }
+
+    // GETTERS E SETTERS (os setters servem ao Jackson no POST; não existe setOcupacaoAtual)
+    public Long getId() { return id; }
+    public String getNumero() { return numero; }
+    public int getAndar() { return andar; }
+    public int getCapacidadeMaxima() { return capacidadeMaxima; }
+    public int getOcupacaoAtual() { return ocupacaoAtual; }
+    public TipoQuarto getTipo() { return tipo; }
+
+    public void setNumero(String numero) { this.numero = numero; }
+    public void setAndar(int andar) { this.andar = andar; }
+    public void setCapacidadeMaxima(int capacidadeMaxima) { this.capacidadeMaxima = capacidadeMaxima; }
+    public void setTipo(TipoQuarto tipo) { this.tipo = tipo; }
+}

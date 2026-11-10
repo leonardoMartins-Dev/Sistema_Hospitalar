@@ -1,11 +1,13 @@
 package com.example.MedVita.dto;
 
+import java.time.LocalDate;
+
 /*
  * =========================================================
  * DTO: NOVA INTERNAÇÃO  (corpo do POST /internacoes)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * POR QUE EXISTE
@@ -26,3 +28,12 @@ package com.example.MedVita.dto;
  *     "dataEntrada": "2026-11-10", "dataPrevistaAlta": "2026-11-15",
  *     "observacoes": "Pós-operatório" }
  */
+
+public record InternacaoRequest(
+        Long pacienteId,
+        Long profissionalId,
+        Long quartoId,
+        LocalDate dataEntrada,
+        LocalDate dataPrevistaAlta,
+        String observacoes) {
+}

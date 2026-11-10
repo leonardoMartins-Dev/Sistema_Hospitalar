@@ -1,11 +1,18 @@
 package com.example.MedVita.repository;
 
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.MedVita.models.Internacao;
+import com.example.MedVita.models.enums.StatusInternacao;
+
 /*
  * =========================================================
  * REPOSITÓRIO DE INTERNAÇÕES
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE VAI SER
@@ -24,3 +31,16 @@ package com.example.MedVita.repository;
  *   boolean existsByQuartoIdAndStatus(Long quartoId, StatusInternacao status)
  *       -> opcional: conferir se o quarto tem gente antes de mexer nele
  */
+
+public interface InternacaoRepository extends JpaRepository<Internacao, Long> {
+
+    List<Internacao> findAllByOrderByDataEntradaDesc();
+
+    List<Internacao> findByPacienteIdOrderByDataEntradaDesc(Long pacienteId);
+
+    List<Internacao> findByStatusOrderByDataEntradaDesc(StatusInternacao status);
+
+    boolean existsByPacienteIdAndStatus(Long pacienteId, StatusInternacao status);
+
+    boolean existsByQuartoIdAndStatus(Long quartoId, StatusInternacao status);
+}
