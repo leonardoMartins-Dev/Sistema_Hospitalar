@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: SITUAÇÃO DA INTERNAÇÃO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * VALORES
@@ -18,3 +18,18 @@ package com.example.MedVita.models.enums;
  * O banco garante que um paciente não tenha duas internações ATIVA ao
  * mesmo tempo (índice único parcial, ver doc da Sprint 2).
  */
+
+public enum StatusInternacao {
+    ATIVA("Internado"),
+    ALTA("Alta concedida");
+
+    private final String descricao;
+
+    StatusInternacao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+}

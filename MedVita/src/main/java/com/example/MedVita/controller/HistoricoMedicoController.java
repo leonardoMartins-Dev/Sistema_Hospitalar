@@ -1,11 +1,21 @@
 package com.example.MedVita.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.MedVita.models.HistoricoMedico;
+import com.example.MedVita.service.HistoricoMedicoService;
+
 /*
  * =========================================================
  * CONTROLLER DO HISTÓRICO MÉDICO  (/historico)
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * O QUE É
@@ -22,3 +32,28 @@ package com.example.MedVita.controller;
  * Só leitura: não existe POST, PUT nem DELETE aqui (RN6).
  * USA: HistoricoMedicoService
  */
+
+@RestController
+@RequestMapping("/historico")
+public class HistoricoMedicoController {
+
+    private final HistoricoMedicoService historicoMedicoService;
+
+    public HistoricoMedicoController(HistoricoMedicoService historicoMedicoService) {
+        this.historicoMedicoService = historicoMedicoService;
+    }
+
+    // histórico do paciente logado (tela paciente/historico)
+    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    public HistoricoMedico meuHistorico(Authentication authentication) {
+        return historicoMedicoService.doPacienteLogado(authentication.getName());
+    }
+
+    // histórico de um paciente qualquer (médico e admin)
+    @GetMapping("/{pacienteId}")
+    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    public HistoricoMedico doPaciente(@PathVariable Long pacienteId) {
+        return historicoMedicoService.doPaciente(pacienteId);
+    }
+}

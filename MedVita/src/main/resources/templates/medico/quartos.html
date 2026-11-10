@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- token CSRF para os POST/PUT da API (lido pelo api.js) -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <title>MEDVITA - Quartos</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -81,11 +85,53 @@
             <h1>Quartos</h1>
             <p>Controle a capacidade e disponibilidade dos quartos.</p>
           </div>
-
-          <button type="button" class="btn"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg> Cadastrar Quarto</button>
         </div>
 
         <div class="content">
+          <div id="mensagem" class="alert" hidden></div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Cadastrar quarto</h2>
+                <p>Cada tipo de quarto tem um limite de leitos.</p>
+              </div>
+            </div>
+
+            <form id="form-quarto">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="numero">Número</label>
+                  <input type="text" id="numero" name="numero" placeholder="Ex.: 305" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="andar">Andar</label>
+                  <input type="number" id="andar" name="andar" min="0" placeholder="Ex.: 3" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="tipo">Tipo</label>
+                  <select id="tipo" name="tipo" required>
+                    <option value="" selected disabled>Selecione o tipo</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="capacidade">Capacidade (leitos)</label>
+                  <input type="number" id="capacidade" name="capacidade" min="1" placeholder="Ex.: 2" required />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                  Cadastrar Quarto
+                </button>
+              </div>
+            </form>
+          </div>
+
           <div class="card">
             <div class="card-header">
               <div>
@@ -94,49 +140,40 @@
               </div>
             </div>
 
-            <div class="table-wrapper">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="filtro-tipo">Tipo</label>
+                <select id="filtro-tipo">
+                  <option value="" selected>Todos os tipos</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="filtro-disponivel">Situação</label>
+                <select id="filtro-disponivel">
+                  <option value="" selected>Todos</option>
+                  <option value="true">Só com vaga</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrapper" style="margin-top: 1.4rem">
               <table class="table">
                 <thead>
                   <tr>
                     <th>Número</th>
                     <th>Andar</th>
+                    <th>Tipo</th>
                     <th>Capacidade máxima</th>
                     <th>Ocupação atual</th>
+                    <th>Leitos livres</th>
                     <th>Situação</th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="tabela-quartos">
                   <tr>
-                    <td>101</td>
-                    <td>1º andar</td>
-                    <td>2 pacientes</td>
-                    <td>1 paciente</td>
-                    <td><span class="badge badge-warning">Ocupado</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>102</td>
-                    <td>1º andar</td>
-                    <td>2 pacientes</td>
-                    <td>0 pacientes</td>
-                    <td><span class="badge badge-success">Disponível</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>204</td>
-                    <td>2º andar</td>
-                    <td>1 paciente</td>
-                    <td>0 pacientes</td>
-                    <td><span class="badge badge-success">Disponível</span></td>
-                  </tr>
-
-                  <tr>
-                    <td>205</td>
-                    <td>2º andar</td>
-                    <td>4 pacientes</td>
-                    <td>4 pacientes</td>
-                    <td><span class="badge badge-danger">Lotado</span></td>
+                    <td colspan="7" class="muted">Carregando...</td>
                   </tr>
                 </tbody>
               </table>
@@ -145,5 +182,94 @@
         </div>
       </main>
     </div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+      const mensagem = document.getElementById("mensagem");
+      const tabela = document.getElementById("tabela-quartos");
+      const selectTipo = document.getElementById("tipo");
+      const filtroTipo = document.getElementById("filtro-tipo");
+      const filtroDisponivel = document.getElementById("filtro-disponivel");
+
+      const nomeTipo = {}; // "UTI" -> "UTI", "ENFERMARIA" -> "Enfermaria"
+
+      function plural(n, palavra) {
+        return n + " " + palavra + (n === 1 ? "" : "s");
+      }
+
+      // TIPOS DE QUARTO (GET /quartos/tipos) NOS DOIS SELECTS
+      async function carregarTipos() {
+        try {
+          const tipos = await api.get("/quartos/tipos");
+          tipos.forEach((t) => {
+            nomeTipo[t.valor] = t.nome;
+            selectTipo.add(new Option(t.nome + " (" + t.leitos + ")", t.valor));
+            filtroTipo.add(new Option(t.nome, t.valor));
+          });
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // MONTA A TABELA (com os filtros de tipo e vaga)
+      async function carregarQuartos() {
+        const params = new URLSearchParams();
+        if (filtroTipo.value) params.set("tipo", filtroTipo.value);
+        if (filtroDisponivel.value) params.set("disponivel", filtroDisponivel.value);
+        const url = "/quartos" + (params.toString() ? "?" + params : "");
+
+        try {
+          const quartos = await api.get(url);
+
+          if (quartos.length === 0) {
+            tabela.innerHTML = '<tr><td colspan="7" class="muted">Nenhum quarto encontrado.</td></tr>';
+            return;
+          }
+
+          tabela.innerHTML = quartos
+            .map((q) => {
+              const badge = q.leitosLivres === 0 ? "badge-danger" : q.ocupacaoAtual > 0 ? "badge-warning" : "badge-success";
+              return `<tr>
+                <td>${api.escapar(q.numero)}</td>
+                <td>${q.andar === 0 ? "Térreo" : q.andar + "º andar"}</td>
+                <td>${api.escapar(nomeTipo[q.tipo] || q.tipo)}</td>
+                <td>${plural(q.capacidadeMaxima, "leito")}</td>
+                <td>${plural(q.ocupacaoAtual, "paciente")}</td>
+                <td>${q.leitosLivres}</td>
+                <td><span class="badge ${badge}">${api.escapar(q.situacao)}</span></td>
+              </tr>`;
+            })
+            .join("");
+        } catch (erro) {
+          tabela.innerHTML = '<tr><td colspan="7" class="muted">Não foi possível carregar os quartos.</td></tr>';
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      }
+
+      // CADASTRAR QUARTO (POST /quartos)
+      document.getElementById("form-quarto").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        try {
+          const quarto = await api.post("/quartos", {
+            numero: document.getElementById("numero").value.trim(),
+            andar: Number(document.getElementById("andar").value),
+            capacidadeMaxima: Number(document.getElementById("capacidade").value),
+            tipo: selectTipo.value,
+          });
+
+          evento.target.reset();
+          api.mostrarMensagem(mensagem, "Quarto " + quarto.numero + " cadastrado.", "sucesso");
+          carregarQuartos();
+        } catch (erro) {
+          api.mostrarMensagem(mensagem, erro.message, "erro");
+        }
+      });
+
+      filtroTipo.addEventListener("change", carregarQuartos);
+      filtroDisponivel.addEventListener("change", carregarQuartos);
+
+      carregarTipos().then(carregarQuartos);
+    </script>
   </body>
 </html>

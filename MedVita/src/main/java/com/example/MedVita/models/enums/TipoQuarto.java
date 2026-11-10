@@ -5,7 +5,7 @@ package com.example.MedVita.models.enums;
  * ENUM: TIPO DE QUARTO
  * =========================================================
  *
- * STATUS: A IMPLEMENTAR. Por enquanto este arquivo é só documentação.
+ * STATUS: IMPLEMENTADO.
  * RESPONSÁVEL: Henrique (Sprint 2)
  *
  * A entrega 4 da Sprint 2 pede regras para os "tipos de quartos". O grupo
@@ -26,3 +26,28 @@ package com.example.MedVita.models.enums;
  * Também serve de filtro: GET /quartos?tipo=UTI&disponivel=true
  * A lista para o select da tela sai em GET /quartos/tipos.
  */
+
+public enum TipoQuarto {
+    ENFERMARIA("Enfermaria", 2, 6),     // quarto coletivo
+    APARTAMENTO("Apartamento", 1, 2),   // quarto privativo
+    UTI("UTI", 1, 10);                  // terapia intensiva
+
+    private final String descricao;
+    private final int minLeitos;
+    private final int maxLeitos;
+
+    TipoQuarto(String descricao, int minLeitos, int maxLeitos) {
+        this.descricao = descricao;
+        this.minLeitos = minLeitos;
+        this.maxLeitos = maxLeitos;
+    }
+
+    // O próprio tipo diz se aceita aquela quantidade de leitos (Quarto.validar usa)
+    public boolean aceitaCapacidade(int capacidade) {
+        return capacidade >= minLeitos && capacidade <= maxLeitos;
+    }
+
+    public String getDescricao() { return descricao; }
+    public int getMinLeitos() { return minLeitos; }
+    public int getMaxLeitos() { return maxLeitos; }
+}

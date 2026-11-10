@@ -280,19 +280,19 @@ Depende da classe `Atendimento` (João Pedro) e dos contratos do Leonardo Martin
 Depende só dos contratos do Leonardo Martins. O histórico, feito por último, usa também a classe `Atendimento` do João Pedro.
 
 **Back**
-- [ ] `models/Quarto.java` (+ `tipo`, `ocupar`, `liberar`, `validar`), `models/enums/TipoQuarto.java`
-- [ ] `repository/QuartoRepository.java` (inclui `buscarParaAtualizar` com trava)
-- [ ] `service/QuartoService.java`, `controller/QuartoController.java`
-- [ ] `models/Internacao.java` (+ `status`, `darAlta`), `models/enums/StatusInternacao.java`
-- [ ] `dto/InternacaoRequest.java`, `repository/InternacaoRepository.java`
-- [ ] `service/InternacaoService.java`, `controller/InternacaoController.java`
-- [ ] **Por último:** `models/HistoricoMedico.java`, `service/HistoricoMedicoService.java`, `controller/HistoricoMedicoController.java`
+- [x] `models/Quarto.java` (+ `tipo`, `ocupar`, `liberar`, `validar`), `models/enums/TipoQuarto.java`
+- [x] `repository/QuartoRepository.java` (inclui `buscarParaAtualizar` com trava)
+- [x] `service/QuartoService.java`, `controller/QuartoController.java`
+- [x] `models/Internacao.java` (+ `status`, `darAlta`), `models/enums/StatusInternacao.java`
+- [x] `dto/InternacaoRequest.java`, `repository/InternacaoRepository.java`
+- [x] `service/InternacaoService.java`, `controller/InternacaoController.java`
+- [x] **Por último:** `models/HistoricoMedico.java`, `service/HistoricoMedicoService.java`, `controller/HistoricoMedicoController.java`
 
 **Telas**
-- [ ] `medico/quartos`: lista com Tipo e Situação, filtro por tipo, cadastrar quarto (select de tipo vindo de `GET /quartos/tipos`)
-- [ ] `medico/internacoes`: internados agora; registrar internação (selects de paciente, médico e quartos disponíveis); dar alta
-- [ ] `paciente/internacoes`: `GET /internacoes/minhas`
-- [ ] `paciente/historico`: `GET /historico`, mostrando o tipo de cada atendimento
+- [x] `medico/quartos`: lista com Tipo e Situação, filtro por tipo, cadastrar quarto (select de tipo vindo de `GET /quartos/tipos`)
+- [x] `medico/internacoes`: internados agora; registrar internação (selects de paciente, médico e quartos disponíveis); dar alta
+- [x] `paciente/internacoes`: `GET /internacoes/minhas`
+- [x] `paciente/historico`: `GET /historico`, mostrando o tipo de cada atendimento
 
 ---
 
