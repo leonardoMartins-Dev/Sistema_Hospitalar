@@ -1,0 +1,6 @@
+# Só o pom.xml e a pasta src entram no build da imagem.
+# Assim o .env (com as senhas) e a pasta target nunca vão parar lá dentro.
+*
+!pom.xml
+!src
+**/.DS_Store
