@@ -43,15 +43,50 @@ A justificativa da escolha do banco está em [`DOCUMENTOS/BancoDeDados/`](DOCUME
 - PostgreSQL no [Supabase](https://supabase.com)
 - Google reCAPTCHA v2
 - Maven
+- Docker e Docker Compose
 
 ## Como rodar
 
-### 1. Pré-requisitos
+Dá para rodar de dois jeitos. Com Docker é mais simples: não precisa instalar Java nem Maven, nem criar conta no Supabase.
+
+### Com Docker (recomendado)
+
+1. Instale o [Docker Desktop](https://www.docker.com/products/docker-desktop/) e deixe ele aberto.
+2. Rode:
+
+```bash
+cd MedVita
+docker compose up --build
+```
+
+3. Acesse <http://localhost:8080> e entre como `admin` / `1234`.
+
+O primeiro build demora alguns minutos, porque baixa o Java, o Maven e as dependências. Os próximos são bem mais rápidos.
+
+O Docker sobe dois containers, configurados no [`docker-compose.yml`](MedVita/docker-compose.yml):
+
+- **db**: um PostgreSQL só seu, criado com o [`schema.sql`](MedVita/supabase/schema.sql) na primeira vez. Os dados continuam lá quando você para e sobe de novo.
+- **app**: o MedVita, compilado pelo [`Dockerfile`](MedVita/Dockerfile).
+
+Não precisa de `.env`. Sem ele, o reCAPTCHA usa as chaves de teste do Google (sempre passa e mostra um aviso vermelho de "somente para testes") e a recuperação de senha não envia e-mail. Para usar suas próprias chaves, seu Gmail ou o Supabase, preencha só essas variáveis no `MedVita/.env` (veja o [passo 3 de "Sem Docker"](#3-criar-o-arquivo-env)). As que ficarem vazias continuam no padrão do Docker.
+
+| Comando (na pasta `MedVita/`) | O que faz |
+|-------------------------------|-----------|
+| `docker compose up --build`   | sobe tudo; rode de novo depois de mudar o código |
+| `docker compose down`         | para os containers (o banco continua salvo) |
+| `docker compose down -v`      | para e **apaga** o banco local; use quando o `schema.sql` mudar |
+| `docker compose logs -f app`  | mostra o log do Spring Boot |
+
+Para abrir o banco local no DBeaver ou no pgAdmin: `localhost:5433`, com banco, usuário e senha `medvita`.
+
+### Sem Docker
+
+#### 1. Pré-requisitos
 
 - JDK 17 ou superior
 - Maven
 
-### 2. Criar o banco no Supabase
+#### 2. Criar o banco no Supabase
 
 1. Crie um projeto em <https://supabase.com>. Guarde a **Database Password** pedida na criação.
 2. Abra o **SQL Editor > New query**, cole todo o conteúdo de [`MedVita/supabase/schema.sql`](MedVita/supabase/schema.sql) e clique em **Run**. Isso cria todas as tabelas do sistema de uma vez.
@@ -64,7 +99,7 @@ postgresql://postgres.abcdefghijklmnop:[YOUR-PASSWORD]@aws-0-sa-east-1.pooler.su
 
 > Use o **Session pooler**, não a "Direct connection": a conexão direta só funciona em redes IPv6 e costuma dar timeout.
 
-### 3. Criar o arquivo `.env`
+#### 3. Criar o arquivo `.env`
 
 Copie o [`MedVita/.env.example`](MedVita/.env.example) para `MedVita/.env` e preencha. Ele não vai para o Git.
 
@@ -82,7 +117,7 @@ SUPABASE_DB_PASSWORD=sua-senha-do-banco
 - **Chaves do reCAPTCHA:** crie em <https://www.google.com/recaptcha/admin>, escolhendo o tipo **v2 "Não sou um robô"** e adicionando `localhost` como domínio.
 - **Supabase:** `SUPABASE_DB_URL` é `jdbc:postgresql://` + tudo o que vem depois do `@` na string do passo 2; `SUPABASE_DB_USER` é o que vem entre `postgresql://` e o `:`; `SUPABASE_DB_PASSWORD` é a senha do banco.
 
-### 4. Iniciar
+#### 4. Iniciar
 
 ```bash
 cd MedVita
@@ -106,7 +141,9 @@ Sistema_Hospitalar/
 ├── DOCUMENTOS/                # documentos do trabalho (diagramas, relatórios...)
 ├── IMAGENS/                   # capturas de tela usadas neste README
 └── MedVita/                   # aplicação Spring Boot
-    ├── supabase/schema.sql    # script que cria as tabelas no Supabase
+    ├── Dockerfile             # imagem do app (usada pelo docker-compose.yml)
+    ├── docker-compose.yml     # sobe o app e um PostgreSQL local
+    ├── supabase/schema.sql    # script que cria as tabelas (no Supabase e no Postgres do Docker)
     ├── .env.example           # modelo do .env (sem senhas)
     └── src/
         ├── main/
